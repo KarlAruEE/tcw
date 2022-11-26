@@ -1,4 +1,4 @@
-package com.karlaru.tcw.xmlmodels;
+package com.karlaru.tcw.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Data
 @XmlRootElement(name = "availableTime")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class AvailableTime {
+public class XMLAvailableTime {
     @XmlElement(name = "uuid")
     private String uuid;
 

@@ -2,7 +2,7 @@ package com.karlaru.tcw.controllers;
 
 import com.karlaru.tcw.models.AvailableChangeTime;
 import com.karlaru.tcw.models.Workshop;
-import com.karlaru.tcw.xmlmodels.ChangeTimes;
+import com.karlaru.tcw.models.XMLChangeTimes;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -60,8 +60,8 @@ public class WorkshopController {
                 .accept(MediaType.TEXT_XML)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
-                .bodyToMono(ChangeTimes.class)
-                .map(ChangeTimes::getAvailableTime)
+                .bodyToMono(XMLChangeTimes.class)
+                .map(XMLChangeTimes::getAvailableTime)
                 .flatMapIterable(list -> list)
                 .map(s -> new AvailableChangeTime(s.getTime(), s.getUuid()))
                 .map(m -> {

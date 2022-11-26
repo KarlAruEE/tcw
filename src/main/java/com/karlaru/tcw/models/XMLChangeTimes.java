@@ -1,4 +1,4 @@
-package com.karlaru.tcw.xmlmodels;
+package com.karlaru.tcw.models;
 
 
 import lombok.AllArgsConstructor;
@@ -16,9 +16,9 @@ import java.util.List;
 @AllArgsConstructor
 @XmlRootElement(name = "tireChangeTimesResponse")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ChangeTimes {
+public class XMLChangeTimes {
 
     @XmlElement(name = "availableTime")
-    List<AvailableTime> availableTime;
+    List<XMLAvailableTime> availableTime;
 
 }
