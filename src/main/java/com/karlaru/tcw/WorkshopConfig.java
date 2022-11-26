@@ -19,13 +19,13 @@ public class WorkshopConfig {
     public List<Workshop> getWorkshops(){
         return workshops.stream()
                 .map(workshop -> {
-                    String workshopName = workshop.get(0);
-                    String workshopAddress = workshop.get(1);
+                    String name = workshop.get(0);
+                    String address = workshop.get(1);
                     List<Workshop.VehicleType> vehicleTypes = Arrays.stream(workshop.get(2).split(","))
                                                                     .map(Workshop.VehicleType::valueOf).toList();
                     String apiUrl = workshop.get(3);
 
-                    return new Workshop(workshopName, workshopAddress, vehicleTypes, apiUrl);
+                    return new Workshop(name, address, vehicleTypes, apiUrl);
                 })
                 .collect(Collectors.toList());
     }
