@@ -6,17 +6,13 @@ import com.karlaru.tcw.models.XMLChangeTimes;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 
 @AllArgsConstructor
@@ -32,18 +28,35 @@ public class WorkshopController {
         return Flux.fromIterable(workshops);
     }
 
-    @GetMapping("/{workshopName}")
-    public Mono<Workshop> getAWorkshop(@PathVariable("workshopName") String workshopName){
-        Optional<Workshop> workshop = workshops.stream()
-                .filter(w -> (Objects.equals(w.getName(), workshopName)))
-                .findAny();
-        return workshop.map(Mono::just).orElseGet(Mono::empty);
+    @GetMapping(value = "/tire-change-times")
+    public Flux<AvailableChangeTime> getAllAvailableTimes(  @RequestParam String from,
+                                                            @RequestParam String until){
+        return Flux.concat(
+                getManchesterTimes(from,until),
+                getLondonTimes(from,until));
     }
 
-    @GetMapping(value = "/tire-change-times")
-    public Flux<Object> getAvailableTimes(){
+    @GetMapping(value = "/{workshop}/tire-change-times")
+    public Flux<AvailableChangeTime> getAvailableTimes( @PathVariable String workshop,
+                                                        @RequestParam String from,
+                                                        @RequestParam String until){
+        if (Objects.equals(workshop, "manchester"))
+            return getManchesterTimes(from,until);
+        else if (Objects.equals(workshop, "london")) {
+            return getLondonTimes(from,until);
+        }
+        return Flux.empty();
 
-        Flux<AvailableChangeTime> manchester = webClient
+    }
+
+    private Flux<AvailableChangeTime> getManchesterTimes(String from, String until){
+
+        String getUrl = String.format(
+                "http://localhost:9004/api/v2/tire-change-times?from=%s", from);
+
+        ZonedDateTime untilZonedDateTime = ZonedDateTime.parse(until + "T00:00:00Z");
+
+        return webClient
                 .get()
                 .uri("http://localhost:9004/api/v2/tire-change-times")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -52,24 +65,27 @@ public class WorkshopController {
                 .map(m -> {
                     m.setWorkshop(workshops.get(0));
                     return m;
-                });
+                })
+                .filter(f -> f.getTime().isBefore(untilZonedDateTime));
+    }
 
-        Flux<AvailableChangeTime> london =  webClient
+    private Flux<AvailableChangeTime> getLondonTimes(String from, String until){
+
+        String getUrl = String.format(
+                "http://localhost:9003/api/v1/tire-change-times/available?from=%s&until=%s", from, until);
+
+        return webClient
                 .get()
-                .uri("http://localhost:9003/api/v1/tire-change-times/available?from=2006-01-02&until=2030-01-02")
+                .uri(getUrl)
                 .accept(MediaType.TEXT_XML)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
                 .bodyToMono(XMLChangeTimes.class)
                 .map(XMLChangeTimes::getAvailableTime)
                 .flatMapIterable(list -> list)
-                .map(s -> new AvailableChangeTime(s.getTime(), s.getUuid()))
+                .map(s -> new AvailableChangeTime(ZonedDateTime.parse(s.getTime()), s.getUuid()))
                 .map(m -> {
                     m.setWorkshop(workshops.get(1));
                     return m;
                 });
-
-        return Flux.concat(manchester, london);
-
     }
 }

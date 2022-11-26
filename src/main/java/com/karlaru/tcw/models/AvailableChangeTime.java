@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.ZonedDateTime;
+
 
 @Data
 @NoArgsConstructor
@@ -15,15 +17,15 @@ public class AvailableChangeTime {
     private boolean available;
     private String uuid;
     private int id;
-    private String time;
+    private ZonedDateTime time;
 
     // Manchester
-    public AvailableChangeTime(boolean available, int id, String time) {
+    public AvailableChangeTime(boolean available, int id, ZonedDateTime time) {
         this(null, available,null, id, time);
     }
 
     // London
-    public AvailableChangeTime(String time, String uuid) {
+    public AvailableChangeTime(ZonedDateTime time, String uuid) {
         this(null, true, uuid, -1, time);
     }
 }
