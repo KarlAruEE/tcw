@@ -58,7 +58,7 @@ public class WorkshopController {
 
         return webClient
                 .get()
-                .uri("http://localhost:9004/api/v2/tire-change-times")
+                .uri(getUrl)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
                 .bodyToFlux(AvailableChangeTime.class)
