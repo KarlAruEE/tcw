@@ -22,6 +22,7 @@ public class TcwApplication {
 
 	@Bean
 	public List<Workshop> workshop() {
+
 		return List.of(
 				new Workshop("Manchester", "14 Bury New Rd, Manchester",
 						List.of(Workshop.VehicleType.CAR, Workshop.VehicleType.TRUCK)),

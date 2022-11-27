@@ -1,27 +1,33 @@
 package com.karlaru.tcw.controllers;
 
-import com.karlaru.tcw.models.AvailableChangeTime;
-import com.karlaru.tcw.models.Workshop;
-import com.karlaru.tcw.models.XMLChangeTimes;
-import lombok.AllArgsConstructor;
+import com.karlaru.tcw.models.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Objects;
 
-
-@AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/workshop")
 public class WorkshopController {
 
-    private WebClient webClient;
-    private List<Workshop> workshops;
+    @Value("${LONDON_URL:http://localhost:9003}")
+    private String londonUrl;
+    @Value("${MANCHESTER_URL:http://localhost:9004}")
+    private String manchesterUrl;
+    private final WebClient webClient;
+    private final List<Workshop> workshops;
+
+    public WorkshopController(WebClient webClient, List<Workshop> workshops) {
+        this.webClient = webClient;
+        this.workshops = workshops;
+    }
 
     @GetMapping
     public Flux<Workshop> getWorkshops(){
@@ -32,27 +38,71 @@ public class WorkshopController {
     public Flux<AvailableChangeTime> getAllAvailableTimes(  @RequestParam String from,
                                                             @RequestParam String until){
         return Flux.concat(
-                getManchesterTimes(from,until),
-                getLondonTimes(from,until));
+                getLondonTimes(from, until),
+                getManchesterTimes(from, until));
+
     }
 
     @GetMapping(value = "/{workshop}/tire-change-times")
     public Flux<AvailableChangeTime> getAvailableTimes( @PathVariable String workshop,
                                                         @RequestParam String from,
-                                                        @RequestParam String until){
-        if (Objects.equals(workshop, "manchester"))
-            return getManchesterTimes(from,until);
-        else if (Objects.equals(workshop, "london")) {
-            return getLondonTimes(from,until);
-        }
-        return Flux.empty();
+                                                        @RequestParam String until,
+                                                        @RequestParam(required = false, defaultValue = "ALL") String vehicle){
 
+        List<Workshop> workshopsToGetTimeFor = workshops.stream()
+                .filter(w -> workshop.equals("All") || w.getName().equals(workshop))
+                .filter(w -> vehicle.equals("ALL") || w.getVehicles().contains(Workshop.VehicleType.valueOf(vehicle)))
+                .toList();
+
+        Flux<AvailableChangeTime> result = Flux.empty();
+
+        // Manchester
+        if (workshopsToGetTimeFor.contains(workshops.get(0))){
+            result = Flux.concat(result, getManchesterTimes(from,until));
+        }
+
+        // London
+        if (workshopsToGetTimeFor.contains(workshops.get(1))){
+            result = Flux.concat(result, getLondonTimes(from,until));
+        }
+        return result;
+
+    }
+
+    @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
+    public Mono<AvailableChangeTime> bookAvailableTime(@PathVariable String workshop,
+                                          @PathVariable Object id,
+                                          @RequestBody ContactInformation contactInformation){
+        // Manchester
+        if (workshop.equals("Manchester")){
+            return webClient
+                    .post()
+                    .uri(manchesterUrl+"/api/v2/tire-change-times/"+id+"/booking")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(BodyInserters.fromValue(contactInformation))
+                    .retrieve()
+                    .bodyToMono(AvailableChangeTime.class);
+        } else if (workshop.equals("London")) {
+            return webClient
+                    .put()
+                    .uri(londonUrl+"/api/v1/tire-change-times/"+id+"/booking")
+                    .contentType(MediaType.TEXT_XML)
+                    .accept(MediaType.TEXT_XML)
+                    .body(BodyInserters.fromValue(contactInformation))
+                    .retrieve()
+                    .bodyToMono(XMLBookingResponse.class)
+                    .map(m -> new AvailableChangeTime(ZonedDateTime.parse(m.getTime()), m.getUuid()));
+
+        }
+
+        return Mono.just(new AvailableChangeTime());
     }
 
     private Flux<AvailableChangeTime> getManchesterTimes(String from, String until){
 
         String getUrl = String.format(
-                "http://localhost:9004/api/v2/tire-change-times?from=%s", from);
+                "%s/api/v2/tire-change-times?from=%s", manchesterUrl, from);
 
         ZonedDateTime untilZonedDateTime = ZonedDateTime.parse(until + "T00:00:00Z");
 
@@ -72,7 +122,7 @@ public class WorkshopController {
     private Flux<AvailableChangeTime> getLondonTimes(String from, String until){
 
         String getUrl = String.format(
-                "http://localhost:9003/api/v1/tire-change-times/available?from=%s&until=%s", from, until);
+                "%s/api/v1/tire-change-times/available?from=%s&until=%s", londonUrl, from, until);
 
         return webClient
                 .get()
