@@ -1,26 +1,20 @@
+version: "3.9"
 services:
   WebClient:
     image: 'karlaru/tcw'
     ports:
       - "8080:8080"
-    depends_on:
-      - LondonWorkshop
-      - ManchesterWorkshop
     environment:
-      - LONDON_URL=http://LondonWorkshop:9003
-      - MANCHESTER_URL=http://ManchesterWorkshop:9004
+      - LONDON_URL=http://london/api/v1/tire-change-times
+      - MANCHESTER_URL=http://manchester/api/v2/tire-change-times
     links:
-      - LondonWorkshop
-      - ManchesterWorkshop
-  LondonWorkshop:
+      - london
+      - manchester
+  london:
     image: 'surmus/london-tire-workshop:2.0.0'
     ports:
       - "9003:80"
-    expose:
-      - "9003"
-  ManchesterWorkshop:
+  manchester:
     image: 'surmus/manchester-tire-workshop:2.0.0'
     ports:
       - "9004:80"
-    expose:
-      - "9004"

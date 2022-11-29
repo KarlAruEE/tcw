@@ -56,8 +56,8 @@ public class WorkshopController {
 
     @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
     public ResponseEntity<Mono<BookingResponse>> bookAvailableTime( @PathVariable String workshop,
-                                                    @PathVariable Object id,
-                                                    @RequestBody Mono<ContactInformation> contactInformation){
+                                                                    @PathVariable Object id,
+                                                                    @RequestBody Mono<ContactInformation> contactInformation){
 
         WorkshopInterface bookWorkshop = workshopList.stream()
                 .filter(w -> w.getWorkshop().name().equals(workshop))
