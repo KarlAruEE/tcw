@@ -40,7 +40,6 @@ public class WorkshopController {
         // Return available times for all matching workshops
         return Flux.fromStream(workshopsToGetTimesFor.stream())
                 .flatMap(w -> w.getAvailableChangeTime(from, until));
-
     }
 
     @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
