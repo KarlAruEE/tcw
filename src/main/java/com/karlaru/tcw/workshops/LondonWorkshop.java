@@ -58,7 +58,7 @@ public class LondonWorkshop implements WorkshopInterface {
     public Mono<BookingResponse> bookChangeTime(Object id, Mono<ContactInformation> contactInformation) {
         return webClient
                 .put()
-                .uri(londonUrl+"/"+id+"/booking")
+                .uri(londonUrl+"/{id}/booking", id)
                 .contentType(MediaType.TEXT_XML)
                 .accept(MediaType.TEXT_XML)
                 .body(contactInformation, ContactInformation.class)
