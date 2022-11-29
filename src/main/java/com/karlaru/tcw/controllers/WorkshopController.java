@@ -72,7 +72,7 @@ public class WorkshopController {
     @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
     public Mono<AvailableChangeTime> bookAvailableTime(@PathVariable String workshop,
                                           @PathVariable Object id,
-                                          @RequestBody ContactInformation contactInformation){
+                                          @RequestBody Mono<ContactInformation> contactInformation){
         // Manchester
         if (workshop.equals("Manchester")){
             return webClient
@@ -80,7 +80,7 @@ public class WorkshopController {
                     .uri(manchesterUrl+"/api/v2/tire-change-times/"+id+"/booking")
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
-                    .body(BodyInserters.fromValue(contactInformation))
+                    .body(contactInformation, ContactInformation.class)
                     .retrieve()
                     .bodyToMono(AvailableChangeTime.class);
         } else if (workshop.equals("London")) {
@@ -89,7 +89,7 @@ public class WorkshopController {
                     .uri(londonUrl+"/api/v1/tire-change-times/"+id+"/booking")
                     .contentType(MediaType.TEXT_XML)
                     .accept(MediaType.TEXT_XML)
-                    .body(BodyInserters.fromValue(contactInformation))
+                    .body(contactInformation, ContactInformation.class)
                     .retrieve()
                     .bodyToMono(XMLBookingResponse.class)
                     .map(m -> new AvailableChangeTime(ZonedDateTime.parse(m.getTime()), m.getUuid()));
