@@ -1,6 +1,7 @@
 package com.karlaru.tcw.controllers;
 
 import com.karlaru.tcw.models.*;
+import com.karlaru.tcw.workshops.WorkshopInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -11,7 +12,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.ZonedDateTime;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/workshop")
@@ -24,14 +27,22 @@ public class WorkshopController {
     private final WebClient webClient;
     private final List<Workshop> workshops;
 
-    public WorkshopController(@Autowired WebClient webClient, @Autowired List<Workshop> workshops) {
+    private final List<? extends WorkshopInterface> workshopList;
+
+    public WorkshopController(@Autowired WebClient webClient, @Autowired List<Workshop> workshops, @Autowired List<? extends WorkshopInterface> workshopList) {
         this.webClient = webClient;
         this.workshops = workshops;
+        this.workshopList = workshopList;
     }
 
     @GetMapping
     public Flux<Workshop> getWorkshops(){
         return Flux.fromIterable(workshops);
+    }
+
+    @GetMapping("/test")
+    public List<String> getList(){
+        return workshopList.stream().map(m -> m.getWorkshopName()).toList();
     }
 
     @GetMapping(value = "/{workshop}/tire-change-times")
@@ -44,6 +55,7 @@ public class WorkshopController {
                 .filter(w -> workshop.equals("All") || w.getName().equals(workshop))
                 .filter(w -> vehicle.equals("ALL") || w.getVehicles().contains(Workshop.VehicleType.valueOf(vehicle)))
                 .toList();
+
 
         Flux<AvailableChangeTime> result = Flux.empty();
 
