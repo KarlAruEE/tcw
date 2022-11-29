@@ -33,7 +33,7 @@ public class WorkshopController {
                                                                       @RequestParam String until,
                                                                       @RequestParam(required = false, defaultValue = "ALL") String vehicle){
 
-        // Filter workshops by workshop name and vehicle type
+        // Get workshops by workshop name and vehicle type
         List<? extends WorkshopInterface> workshopsToGetTimesFor = workshopList.stream()
                 .filter(w -> workshop.contains("All") || workshop.contains(w.getWorkshop().name()))
                 .filter(w -> vehicle.equals("ALL") || w.getWorkshop().vehicles().contains(Workshop.VehicleType.valueOf(vehicle)))

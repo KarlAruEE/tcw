@@ -1,10 +1,11 @@
 package com.karlaru.tcw.workshops;
 
+
 import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.BookingResponse;
 import com.karlaru.tcw.response.models.ContactInformation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class ManchesterWorkshop implements WorkshopInterface {
     private final Workshop workshop =
             new Workshop("Manchester", "14 Bury New Rd, Manchester", List.of(Workshop.VehicleType.CAR, Workshop.VehicleType.TRUCK));
 
-    public ManchesterWorkshop(@Autowired WebClient webClient) {
+    public ManchesterWorkshop(@Lazy WebClient webClient) {
         this.webClient = webClient;
     }
 
