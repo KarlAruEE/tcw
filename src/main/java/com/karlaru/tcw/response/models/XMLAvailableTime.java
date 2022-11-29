@@ -1,4 +1,4 @@
-package com.karlaru.tcw.models;
+package com.karlaru.tcw.response.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

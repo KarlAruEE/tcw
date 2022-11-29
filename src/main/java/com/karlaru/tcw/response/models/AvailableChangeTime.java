@@ -1,6 +1,7 @@
-package com.karlaru.tcw.models;
+package com.karlaru.tcw.response.models;
 
 
+import com.karlaru.tcw.workshops.Workshop;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,7 @@ public class AvailableChangeTime {
 
     // Manchester
     public AvailableChangeTime(boolean available, int id, ZonedDateTime time) {
-        this(null, available,null, id, time);
+        this(null, available, null, id, time);
     }
 
     // London

@@ -1,6 +1,10 @@
 package com.karlaru.tcw.workshops;
 
-import com.karlaru.tcw.models.*;
+
+import com.karlaru.tcw.response.models.AvailableChangeTime;
+import com.karlaru.tcw.response.models.BookingResponse;
+import com.karlaru.tcw.response.models.ContactInformation;
+import com.karlaru.tcw.response.models.XMLChangeTimesResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -40,8 +44,8 @@ public class LondonWorkshop implements WorkshopInterface {
                 .uri(getUrl)
                 .accept(MediaType.TEXT_XML)
                 .retrieve()
-                .bodyToMono(XMLChangeTimes.class)
-                .map(XMLChangeTimes::getAvailableTime)
+                .bodyToMono(XMLChangeTimesResponse.class)
+                .map(XMLChangeTimesResponse::getAvailableTime)
                 .flatMapIterable(list -> list)
                 .map(s -> new AvailableChangeTime(ZonedDateTime.parse(s.getTime()), s.getUuid()))
                 .map(m -> {

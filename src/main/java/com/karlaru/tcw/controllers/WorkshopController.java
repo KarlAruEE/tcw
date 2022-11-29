@@ -1,9 +1,9 @@
 package com.karlaru.tcw.controllers;
 
-import com.karlaru.tcw.models.AvailableChangeTime;
-import com.karlaru.tcw.models.BookingResponse;
-import com.karlaru.tcw.models.ContactInformation;
-import com.karlaru.tcw.models.Workshop;
+import com.karlaru.tcw.response.models.AvailableChangeTime;
+import com.karlaru.tcw.response.models.BookingResponse;
+import com.karlaru.tcw.response.models.ContactInformation;
+import com.karlaru.tcw.workshops.Workshop;
 import com.karlaru.tcw.workshops.WorkshopInterface;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -33,8 +33,8 @@ public class WorkshopController {
 
         // Filter workshops by workshop name and vehicle type
         List<? extends WorkshopInterface> workshopsToGetTimesFor = workshopList.stream()
-                .filter(w -> workshop.contains("All") || workshop.contains(w.getWorkshop().getName()))
-                .filter(w -> vehicle.equals("ALL") || w.getWorkshop().getVehicles().contains(Workshop.VehicleType.valueOf(vehicle)))
+                .filter(w -> workshop.contains("All") || workshop.contains(w.getWorkshop().name()))
+                .filter(w -> vehicle.equals("ALL") || w.getWorkshop().vehicles().contains(Workshop.VehicleType.valueOf(vehicle)))
                 .toList();
 
         // Return available times for all matching workshops
@@ -44,11 +44,11 @@ public class WorkshopController {
 
     @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
     public Mono<BookingResponse> bookAvailableTime( @PathVariable String workshop,
-                                                        @PathVariable Object id,
-                                                        @RequestBody Mono<ContactInformation> contactInformation){
+                                                    @PathVariable Object id,
+                                                    @RequestBody Mono<ContactInformation> contactInformation){
 
         WorkshopInterface bookWorkshop = workshopList.stream()
-                .filter(w -> w.getWorkshop().getName().equals(workshop))
+                .filter(w -> w.getWorkshop().name().equals(workshop))
                 .findAny()
                 .get();
         return bookWorkshop.bookChangeTime(id, contactInformation);

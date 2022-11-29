@@ -1,9 +1,8 @@
 package com.karlaru.tcw.workshops;
 
-import com.karlaru.tcw.models.AvailableChangeTime;
-import com.karlaru.tcw.models.BookingResponse;
-import com.karlaru.tcw.models.ContactInformation;
-import com.karlaru.tcw.models.Workshop;
+import com.karlaru.tcw.response.models.AvailableChangeTime;
+import com.karlaru.tcw.response.models.BookingResponse;
+import com.karlaru.tcw.response.models.ContactInformation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
