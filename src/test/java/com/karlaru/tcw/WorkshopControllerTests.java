@@ -1,29 +1,18 @@
 package com.karlaru.tcw;
 
-import com.karlaru.tcw.controllers.WorkshopController;
-import com.karlaru.tcw.workshops.LondonWorkshop;
-import com.karlaru.tcw.workshops.ManchesterWorkshop;
-import com.karlaru.tcw.workshops.WorkshopInterface;
-import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.List;
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class WorkshopControllerTests {
 
-@AllArgsConstructor
-@SpringBootTest
-public class TestWorkshopController {
-
-
-    private final List<WorkshopInterface> workshopList = List.of(
-            new LondonWorkshop(WebClient.builder().build()),
-            new ManchesterWorkshop(WebClient.builder().build()));
+    @Autowired
+    private WebTestClient webTestClient;
 
     @Test
     public void shouldReturnWorkshopList(){
-        WebTestClient webTestClient = WebTestClient.bindToController(new WorkshopController(workshopList)).build();
         webTestClient
                 .get().uri("/api/v1/workshop")
                 .exchange()
