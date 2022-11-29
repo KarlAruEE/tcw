@@ -1,4 +1,4 @@
-## Tire Workshop
+## Tire Change Workshop
 
 ### Run with Docker Compse
 
@@ -9,5 +9,5 @@ docker-compose up -d
 
 #### Simple JavaScript Front-end at [localhost:8080](http://localhost:8080)
 
----
+
 
