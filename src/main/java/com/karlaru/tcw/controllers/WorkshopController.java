@@ -50,8 +50,8 @@ public class WorkshopController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(Flux.fromStream(workshopsToGetTimesFor.stream())
-                        .flatMap(w -> w.getAvailableChangeTime(from, until))
-                        .timeout(Duration.ofSeconds(10), Flux.empty()));
+                        .flatMap(w ->  w.getAvailableChangeTime(from, until)
+                                        .timeout(Duration.ofSeconds(10), Flux.empty())));
     }
 
     @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
