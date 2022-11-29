@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.List;
 
 @AllArgsConstructor
@@ -24,7 +25,8 @@ public class WorkshopController {
     @GetMapping
     public Flux<Workshop> getWorkshops(){
         return Flux.fromStream(workshopList.stream())
-                .map(WorkshopInterface::getWorkshop);
+                .map(WorkshopInterface::getWorkshop)
+                .timeout(Duration.ofSeconds(3));
     }
 
     @GetMapping(value = "/{workshop}/tire-change-times")
@@ -48,7 +50,8 @@ public class WorkshopController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(Flux.fromStream(workshopsToGetTimesFor.stream())
-                .flatMap(w -> w.getAvailableChangeTime(from, until)));
+                        .flatMap(w -> w.getAvailableChangeTime(from, until))
+                        .timeout(Duration.ofSeconds(3)));
     }
 
     @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
@@ -68,7 +71,7 @@ public class WorkshopController {
         }
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(bookWorkshop.bookChangeTime(id, contactInformation));
+                .body(bookWorkshop.bookChangeTime(id, contactInformation).timeout(Duration.ofSeconds(3)));
 
     }
 }
