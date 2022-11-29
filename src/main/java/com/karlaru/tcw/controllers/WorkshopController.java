@@ -40,35 +40,21 @@ public class WorkshopController {
         return Flux.fromIterable(workshops);
     }
 
-    @GetMapping("/test")
-    public List<String> getList(){
-        return workshopList.stream().map(m -> m.getWorkshopName()).toList();
-    }
-
     @GetMapping(value = "/{workshop}/tire-change-times")
-    public Flux<AvailableChangeTime> getAvailableTimes( @PathVariable String workshop,
+    public Flux<AvailableChangeTime> getAvailableTimes( @PathVariable List<String> workshop,
                                                         @RequestParam String from,
                                                         @RequestParam String until,
                                                         @RequestParam(required = false, defaultValue = "ALL") String vehicle){
 
-        List<Workshop> workshopsToGetTimeFor = workshops.stream()
-                .filter(w -> workshop.equals("All") || w.getName().equals(workshop))
-                .filter(w -> vehicle.equals("ALL") || w.getVehicles().contains(Workshop.VehicleType.valueOf(vehicle)))
+        // Filter workshops by workshop name and vehicle type
+        List<? extends WorkshopInterface> workshopsToGetTimesFor = workshopList.stream()
+                .filter(w -> workshop.contains("All") || workshop.contains(w.getWorkshop().getName()))
+                .filter(w -> vehicle.equals("ALL") || w.getWorkshop().getVehicles().contains(Workshop.VehicleType.valueOf(vehicle)))
                 .toList();
 
-
-        Flux<AvailableChangeTime> result = Flux.empty();
-
-        // Manchester
-        if (workshopsToGetTimeFor.contains(workshops.get(0))){
-            result = Flux.concat(result, getManchesterTimes(from,until));
-        }
-
-        // London
-        if (workshopsToGetTimeFor.contains(workshops.get(1))){
-            result = Flux.concat(result, getLondonTimes(from,until));
-        }
-        return result;
+        // Return available times for all matching workshops
+        return Flux.fromStream(workshopsToGetTimesFor.stream())
+                .flatMap(w -> w.getAvailableChangeTime(from, until));
 
     }
 
@@ -107,40 +93,4 @@ public class WorkshopController {
                 .map(m -> new AvailableChangeTime(ZonedDateTime.parse(m.getTime()), m.getUuid()));
     }
 
-    private Flux<AvailableChangeTime> getManchesterTimes(String from, String until){
-
-        String getUrl = String.format("%s?from=%s", manchesterUrl, from);
-        ZonedDateTime untilZonedDateTime = ZonedDateTime.parse(until + "T00:00:00Z");
-
-        return webClient
-                .get()
-                .uri(getUrl)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .retrieve()
-                .bodyToFlux(AvailableChangeTime.class)
-                .map(m -> {
-                    m.setWorkshop(workshops.get(0));
-                    return m;
-                })
-                .filter(f -> f.getTime().isBefore(untilZonedDateTime));
-    }
-
-    private Flux<AvailableChangeTime> getLondonTimes(String from, String until){
-
-        String getUrl = String.format("%s/available?from=%s&until=%s", londonUrl, from, until);
-
-        return webClient
-                .get()
-                .uri(getUrl)
-                .accept(MediaType.TEXT_XML)
-                .retrieve()
-                .bodyToMono(XMLChangeTimes.class)
-                .map(XMLChangeTimes::getAvailableTime)
-                .flatMapIterable(list -> list)
-                .map(s -> new AvailableChangeTime(ZonedDateTime.parse(s.getTime()), s.getUuid()))
-                .map(m -> {
-                    m.setWorkshop(workshops.get(1));
-                    return m;
-                });
-    }
 }

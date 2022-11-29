@@ -29,8 +29,8 @@ public class ManchesterWorkshop implements WorkshopInterface {
     }
 
     @Override
-    public String getWorkshopName(){
-        return this.workshop.getName();
+    public Workshop getWorkshop(){
+        return this.workshop;
     }
 
     @Override
