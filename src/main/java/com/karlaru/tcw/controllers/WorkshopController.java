@@ -1,11 +1,11 @@
 package com.karlaru.tcw.controllers;
 
 import com.karlaru.tcw.models.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,7 +24,7 @@ public class WorkshopController {
     private final WebClient webClient;
     private final List<Workshop> workshops;
 
-    public WorkshopController(WebClient webClient, List<Workshop> workshops) {
+    public WorkshopController(@Autowired WebClient webClient, @Autowired List<Workshop> workshops) {
         this.webClient = webClient;
         this.workshops = workshops;
     }
@@ -32,15 +32,6 @@ public class WorkshopController {
     @GetMapping
     public Flux<Workshop> getWorkshops(){
         return Flux.fromIterable(workshops);
-    }
-
-    @GetMapping(value = "/tire-change-times")
-    public Flux<AvailableChangeTime> getAllAvailableTimes(  @RequestParam String from,
-                                                            @RequestParam String until){
-        return Flux.concat(
-                getLondonTimes(from, until),
-                getManchesterTimes(from, until));
-
     }
 
     @GetMapping(value = "/{workshop}/tire-change-times")
@@ -70,33 +61,38 @@ public class WorkshopController {
     }
 
     @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
-    public Mono<AvailableChangeTime> bookAvailableTime(@PathVariable String workshop,
-                                          @PathVariable Object id,
-                                          @RequestBody Mono<ContactInformation> contactInformation){
-        // Manchester
+    public Mono<AvailableChangeTime> bookAvailableTime( @PathVariable String workshop,
+                                                        @PathVariable Object id,
+                                                        @RequestBody Mono<ContactInformation> contactInformation){
         if (workshop.equals("Manchester")){
-            return webClient
-                    .post()
-                    .uri(manchesterUrl+"/"+id+"/booking")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .body(contactInformation, ContactInformation.class)
-                    .retrieve()
-                    .bodyToMono(AvailableChangeTime.class);
+            return bookManchesterTime(id, contactInformation);
         } else if (workshop.equals("London")) {
-            return webClient
-                    .put()
-                    .uri(londonUrl+"/"+id+"/booking")
-                    .contentType(MediaType.TEXT_XML)
-                    .accept(MediaType.TEXT_XML)
-                    .body(contactInformation, ContactInformation.class)
-                    .retrieve()
-                    .bodyToMono(XMLBookingResponse.class)
-                    .map(m -> new AvailableChangeTime(ZonedDateTime.parse(m.getTime()), m.getUuid()));
-
+            return bookLondonTime(id, contactInformation);
         }
 
         return Mono.just(new AvailableChangeTime());
+    }
+
+    private Mono<AvailableChangeTime> bookManchesterTime(Object id, Mono<ContactInformation> contactInformation){
+        return webClient
+                .post()
+                .uri(manchesterUrl+"/"+id+"/booking")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(contactInformation, ContactInformation.class)
+                .retrieve()
+                .bodyToMono(AvailableChangeTime.class);
+    }
+    private Mono<AvailableChangeTime> bookLondonTime(Object id, Mono<ContactInformation> contactInformation){
+        return webClient
+                .put()
+                .uri(londonUrl+"/"+id+"/booking")
+                .contentType(MediaType.TEXT_XML)
+                .accept(MediaType.TEXT_XML)
+                .body(contactInformation, ContactInformation.class)
+                .retrieve()
+                .bodyToMono(XMLBookingResponse.class)
+                .map(m -> new AvailableChangeTime(ZonedDateTime.parse(m.getTime()), m.getUuid()));
     }
 
     private Flux<AvailableChangeTime> getManchesterTimes(String from, String until){
