@@ -135,7 +135,7 @@
         availableTimes.forEach(time =>{
             const id = (time.id === -1) ? time.uuid : time.id;
             const location = time.workshop.name;
-            const button = '<button class="btn btn-outline-success" onclick="bookTime(\''+id+'\', \''+location+'\');">Book</button>'
+            const button = '<button class="btn btn-outline-success btn-sm" onclick="bookTime(\''+id+'\', \''+location+'\');">Book</button>'
             let row =
                 '<tr>' +
                     '<td>'+time.workshop.name+'</td>' +
