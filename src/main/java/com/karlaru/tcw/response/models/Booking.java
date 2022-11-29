@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NoArgsConstructor
 @XmlRootElement(name = "tireChangeBookingResponse")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class BookingResponse {
+public class Booking {
     private boolean available;
     private int id;
     @XmlElement(name = "time")
@@ -21,12 +21,12 @@ public class BookingResponse {
     private String uuid;
 
 
-    public BookingResponse(String time, String uuid) {
+    public Booking(String time, String uuid) {
         this.time = time;
         this.uuid = uuid;
     }
 
-    public BookingResponse(boolean available, int id, String time) {
+    public Booking(boolean available, int id, String time) {
         this.available = available;
         this.id = id;
         this.time = time;

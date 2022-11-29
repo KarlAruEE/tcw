@@ -1,7 +1,7 @@
 package com.karlaru.tcw.controllers;
 
 import com.karlaru.tcw.response.models.AvailableChangeTime;
-import com.karlaru.tcw.response.models.BookingResponse;
+import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
 import com.karlaru.tcw.workshops.Workshop;
 import com.karlaru.tcw.workshops.WorkshopInterface;
@@ -55,9 +55,9 @@ public class WorkshopController {
     }
 
     @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
-    public ResponseEntity<Mono<BookingResponse>> bookAvailableTime( @PathVariable String workshop,
-                                                                    @PathVariable Object id,
-                                                                    @RequestBody Mono<ContactInformation> contactInformation){
+    public ResponseEntity<Mono<Booking>> bookAvailableTime(@PathVariable String workshop,
+                                                           @PathVariable Object id,
+                                                           @RequestBody Mono<ContactInformation> contactInformation){
 
         WorkshopInterface bookWorkshop = workshopList.stream()
                 .filter(w -> w.getWorkshop().name().equals(workshop))

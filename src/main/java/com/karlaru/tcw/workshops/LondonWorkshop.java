@@ -2,7 +2,7 @@ package com.karlaru.tcw.workshops;
 
 
 import com.karlaru.tcw.response.models.AvailableChangeTime;
-import com.karlaru.tcw.response.models.BookingResponse;
+import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
 import com.karlaru.tcw.response.models.XMLChangeTimesResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,7 +55,7 @@ public class LondonWorkshop implements WorkshopInterface {
     }
 
     @Override
-    public Mono<BookingResponse> bookChangeTime(Object id, Mono<ContactInformation> contactInformation) {
+    public Mono<Booking> bookChangeTime(Object id, Mono<ContactInformation> contactInformation) {
         return webClient
                 .put()
                 .uri(londonUrl+"/{id}/booking", id)
@@ -63,6 +63,6 @@ public class LondonWorkshop implements WorkshopInterface {
                 .accept(MediaType.TEXT_XML)
                 .body(contactInformation, ContactInformation.class)
                 .retrieve()
-                .bodyToMono(BookingResponse.class);
+                .bodyToMono(Booking.class);
     }
 }
