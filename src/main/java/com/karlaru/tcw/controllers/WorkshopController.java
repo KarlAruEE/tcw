@@ -26,7 +26,7 @@ public class WorkshopController {
     public Flux<Workshop> getWorkshops(){
         return Flux.fromStream(workshopList.stream())
                 .map(WorkshopInterface::getWorkshop)
-                .timeout(Duration.ofSeconds(3));
+                .timeout(Duration.ofSeconds(10), Flux.empty());
     }
 
     @GetMapping(value = "/{workshop}/tire-change-times")
@@ -51,7 +51,7 @@ public class WorkshopController {
                 .status(HttpStatus.OK)
                 .body(Flux.fromStream(workshopsToGetTimesFor.stream())
                         .flatMap(w -> w.getAvailableChangeTime(from, until))
-                        .timeout(Duration.ofSeconds(3)));
+                        .timeout(Duration.ofSeconds(10), Flux.empty()));
     }
 
     @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
@@ -71,7 +71,8 @@ public class WorkshopController {
         }
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(bookWorkshop.bookChangeTime(id, contactInformation).timeout(Duration.ofSeconds(3)));
+                .body(bookWorkshop.bookChangeTime(id, contactInformation)
+                        .timeout(Duration.ofSeconds(10), Mono.empty()));
 
     }
 }
