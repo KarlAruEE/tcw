@@ -1,7 +1,9 @@
 package com.karlaru.tcw.workshops;
 
-import com.karlaru.tcw.models.*;
-import lombok.ToString;
+import com.karlaru.tcw.models.AvailableChangeTime;
+import com.karlaru.tcw.models.BookingResponse;
+import com.karlaru.tcw.models.ContactInformation;
+import com.karlaru.tcw.models.Workshop;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
