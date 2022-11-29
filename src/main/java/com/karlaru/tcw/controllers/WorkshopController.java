@@ -17,9 +17,9 @@ import java.util.List;
 @RequestMapping("/api/v1/workshop")
 public class WorkshopController {
 
-    @Value("${LONDON_URL:http://localhost:9003}")
+    @Value("${LONDON_URL:http://localhost:9003/api/v1/tire-change-times}")
     private String londonUrl;
-    @Value("${MANCHESTER_URL:http://localhost:9004}")
+    @Value("${MANCHESTER_URL:http://localhost:9004/api/v2/tire-change-times}")
     private String manchesterUrl;
     private final WebClient webClient;
     private final List<Workshop> workshops;
@@ -77,7 +77,7 @@ public class WorkshopController {
         if (workshop.equals("Manchester")){
             return webClient
                     .post()
-                    .uri(manchesterUrl+"/api/v2/tire-change-times/"+id+"/booking")
+                    .uri(manchesterUrl+"/"+id+"/booking")
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .body(contactInformation, ContactInformation.class)
@@ -86,7 +86,7 @@ public class WorkshopController {
         } else if (workshop.equals("London")) {
             return webClient
                     .put()
-                    .uri(londonUrl+"/api/v1/tire-change-times/"+id+"/booking")
+                    .uri(londonUrl+"/"+id+"/booking")
                     .contentType(MediaType.TEXT_XML)
                     .accept(MediaType.TEXT_XML)
                     .body(contactInformation, ContactInformation.class)
@@ -101,9 +101,7 @@ public class WorkshopController {
 
     private Flux<AvailableChangeTime> getManchesterTimes(String from, String until){
 
-        String getUrl = String.format(
-                "%s/api/v2/tire-change-times?from=%s", manchesterUrl, from);
-
+        String getUrl = String.format("%s?from=%s", manchesterUrl, from);
         ZonedDateTime untilZonedDateTime = ZonedDateTime.parse(until + "T00:00:00Z");
 
         return webClient
@@ -121,8 +119,7 @@ public class WorkshopController {
 
     private Flux<AvailableChangeTime> getLondonTimes(String from, String until){
 
-        String getUrl = String.format(
-                "%s/api/v1/tire-change-times/available?from=%s&until=%s", londonUrl, from, until);
+        String getUrl = String.format("%s/available?from=%s&until=%s", londonUrl, from, until);
 
         return webClient
                 .get()
