@@ -6,6 +6,8 @@ import com.karlaru.tcw.response.models.ContactInformation;
 import com.karlaru.tcw.workshops.Workshop;
 import com.karlaru.tcw.workshops.WorkshopInterface;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,10 +28,10 @@ public class WorkshopController {
     }
 
     @GetMapping(value = "/{workshop}/tire-change-times")
-    public Flux<AvailableChangeTime> getAvailableTimes( @PathVariable List<String> workshop,
-                                                        @RequestParam String from,
-                                                        @RequestParam String until,
-                                                        @RequestParam(required = false, defaultValue = "ALL") String vehicle){
+    public ResponseEntity<Flux<AvailableChangeTime>> getAvailableTimes(@PathVariable List<String> workshop,
+                                                                      @RequestParam String from,
+                                                                      @RequestParam String until,
+                                                                      @RequestParam(required = false, defaultValue = "ALL") String vehicle){
 
         // Filter workshops by workshop name and vehicle type
         List<? extends WorkshopInterface> workshopsToGetTimesFor = workshopList.stream()
@@ -37,21 +39,36 @@ public class WorkshopController {
                 .filter(w -> vehicle.equals("ALL") || w.getWorkshop().vehicles().contains(Workshop.VehicleType.valueOf(vehicle)))
                 .toList();
 
+        if (workshopsToGetTimesFor.size() == 0)
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Flux.empty());
+
         // Return available times for all matching workshops
-        return Flux.fromStream(workshopsToGetTimesFor.stream())
-                .flatMap(w -> w.getAvailableChangeTime(from, until));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(Flux.fromStream(workshopsToGetTimesFor.stream())
+                .flatMap(w -> w.getAvailableChangeTime(from, until)));
     }
 
     @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
-    public Mono<BookingResponse> bookAvailableTime( @PathVariable String workshop,
+    public ResponseEntity<Mono<BookingResponse>> bookAvailableTime( @PathVariable String workshop,
                                                     @PathVariable Object id,
                                                     @RequestBody Mono<ContactInformation> contactInformation){
 
         WorkshopInterface bookWorkshop = workshopList.stream()
                 .filter(w -> w.getWorkshop().name().equals(workshop))
                 .findAny()
-                .get();
-        return bookWorkshop.bookChangeTime(id, contactInformation);
+                .orElse(null);
+
+        if (bookWorkshop == null){
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Mono.empty());
+        }
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(bookWorkshop.bookChangeTime(id, contactInformation));
 
     }
 }
