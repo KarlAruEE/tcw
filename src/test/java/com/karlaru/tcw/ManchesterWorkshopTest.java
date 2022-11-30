@@ -41,7 +41,11 @@ public class ManchesterWorkshopTest {
         manchesterWorkshop.setTestWebClient(baseUrl);
 
         AvailableChangeTime testTime1 = new AvailableChangeTime(true, 5, ZonedDateTime.parse("2022-11-23T12:00:00Z"));
+        testTime1.setWorkshop(manchesterWorkshop.getWorkshop());
+
         AvailableChangeTime testTime2 = new AvailableChangeTime(false, 13, ZonedDateTime.parse("2022-11-24T01:00:00Z"));
+        testTime2.setWorkshop(manchesterWorkshop.getWorkshop());
+
         String remoteApiResponse = "[" +
                                         "{" +
                                             "\"id\":5," +
@@ -67,12 +71,12 @@ public class ManchesterWorkshopTest {
                 .expectNextMatches(e ->
                                 e.getId() == testTime1.getId() &&
                                 e.isAvailable() &&
-                                e.getWorkshop() == manchesterWorkshop.getWorkshop() &&
+                                e.getWorkshop() == testTime1.getWorkshop() &&
                                 e.getTime().isEqual(testTime1.getTime()))
                 .expectNextMatches(e ->
                                 e.getId() == testTime2.getId() &&
                                 !e.isAvailable() &&
-                                e.getWorkshop() == manchesterWorkshop.getWorkshop() &&
+                                e.getWorkshop() == testTime2.getWorkshop() &&
                                 e.getTime().isEqual(testTime2.getTime()))
                 .verifyComplete();
     }
