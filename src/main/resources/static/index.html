@@ -35,6 +35,7 @@
         </div>
     </form>
     <hr>
+    <div id="responses"></div>
     <table class="table table-hover">
         <thead>
         <tr>
@@ -159,7 +160,8 @@
             alert("ContactInformation is mandatory!")
             return false;
         }
-        await bookAvailableTime(id, workshopName, contactInformation);
+        const response = await bookAvailableTime(id, workshopName, contactInformation);
+        alert("Success\n"+JSON.stringify(response));
         await renderAvailableTimes();
     }
     async function bookAvailableTime(id, workshopName, contactInformation) {
