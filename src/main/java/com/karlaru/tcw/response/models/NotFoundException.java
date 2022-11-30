@@ -14,10 +14,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 @AllArgsConstructor
 @XmlRootElement(name = "errorResponse")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Unsuccessful{
+public class NotFoundException extends Throwable{
     @XmlElement(name = "statusCode")
     private HttpStatus code;
     @XmlElement(name = "error")
     private String message;
+
+    public String response(){
+        return "{\"code\":\""+code+"\"," +
+                "\"message\":\""+message+"\"}";
+    }
+
 }
 

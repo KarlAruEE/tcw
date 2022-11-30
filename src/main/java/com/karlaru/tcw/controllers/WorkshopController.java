@@ -3,6 +3,7 @@ package com.karlaru.tcw.controllers;
 import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
+import com.karlaru.tcw.response.models.NotFoundException;
 import com.karlaru.tcw.workshops.Workshop;
 import com.karlaru.tcw.workshops.WorkshopInterface;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,9 @@ public class WorkshopController {
     @GetMapping
     public Flux<Workshop> getWorkshops(){
         return Flux.fromStream(workshopList.stream())
-                .map(WorkshopInterface::getWorkshop);
+                .map(WorkshopInterface::getWorkshop)
+                .switchIfEmpty(
+                        Flux.error(new NotFoundException(HttpStatus.NOT_FOUND, "Workshop list is empty!")));
     }
 
     @GetMapping(value = "/{workshop}/tire-change-times")
