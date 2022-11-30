@@ -30,8 +30,9 @@ public class ManchesterWorkshop implements WorkshopInterface {
         this.webClient = webClient;
     }
 
-    public void setMockUrl(String manchesterUrl){
-        this.manchesterUrl = manchesterUrl;
+    @Override
+    public void setMockUrl(String mockUrl){
+        this.manchesterUrl = mockUrl;
     }
 
     @Override
