@@ -4,7 +4,6 @@ import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
 import com.karlaru.tcw.workshops.LondonWorkshop;
-import com.karlaru.tcw.workshops.ManchesterWorkshop;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
