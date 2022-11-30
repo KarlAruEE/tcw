@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 
 @ExtendWith(MockitoExtension.class)
-public class WorkshopTest {
+public class ManchesterWorkshopTest {
 
 
     private static MockWebServer mockWebServer;
