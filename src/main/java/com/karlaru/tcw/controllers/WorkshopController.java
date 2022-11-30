@@ -25,8 +25,7 @@ public class WorkshopController {
     @GetMapping
     public Flux<Workshop> getWorkshops(){
         return Flux.fromStream(workshopList.stream())
-                .map(WorkshopInterface::getWorkshop)
-                .timeout(Duration.ofSeconds(10), Flux.empty());
+                .map(WorkshopInterface::getWorkshop);
     }
 
     @GetMapping(value = "/{workshop}/tire-change-times")
@@ -71,8 +70,7 @@ public class WorkshopController {
         }
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(bookWorkshop.bookChangeTime(id, contactInformation)
-                        .timeout(Duration.ofSeconds(10), Mono.empty()));
+                .body(bookWorkshop.bookChangeTime(id, contactInformation));
 
     }
 }
