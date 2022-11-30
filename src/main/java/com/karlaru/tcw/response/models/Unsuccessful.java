@@ -13,9 +13,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @AllArgsConstructor
 @XmlRootElement(name = "errorResponse")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Unsucess extends Throwable{
+public class Unsuccessful extends Throwable{
     @XmlElement(name = "statusCode")
     private String code;
     @XmlElement(name = "error")
     private String message;
 }
+
