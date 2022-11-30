@@ -30,6 +30,10 @@ public class ManchesterWorkshop implements WorkshopInterface {
         this.webClient = webClient;
     }
 
+    public void setTestWebClient(String manchesterUrl){
+        this.manchesterUrl = manchesterUrl;
+    }
+
     @Override
     public Workshop getWorkshop(){
         return this.workshop;
