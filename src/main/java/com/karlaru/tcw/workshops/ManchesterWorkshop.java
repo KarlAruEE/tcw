@@ -4,9 +4,11 @@ package com.karlaru.tcw.workshops;
 import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
+import com.karlaru.tcw.response.models.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -51,6 +53,8 @@ public class ManchesterWorkshop implements WorkshopInterface {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
                 .bodyToFlux(AvailableChangeTime.class)
+                .onErrorResume(clientResponse -> Mono.error(
+                        new NotFoundException(HttpStatus.NOT_FOUND, "Workshop "+getWorkshop().name()+" returned 404")))
                 .map(m -> {
                     m.setWorkshop(workshop);
                     return m;

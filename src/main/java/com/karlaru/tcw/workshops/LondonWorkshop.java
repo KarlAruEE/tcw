@@ -1,12 +1,10 @@
 package com.karlaru.tcw.workshops;
 
 
-import com.karlaru.tcw.response.models.AvailableChangeTime;
-import com.karlaru.tcw.response.models.Booking;
-import com.karlaru.tcw.response.models.ContactInformation;
-import com.karlaru.tcw.response.models.XMLChangeTimesResponse;
+import com.karlaru.tcw.response.models.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -50,6 +48,8 @@ public class LondonWorkshop implements WorkshopInterface {
                 .accept(MediaType.TEXT_XML)
                 .retrieve()
                 .bodyToMono(XMLChangeTimesResponse.class)
+                .onErrorResume(clientResponse -> Mono.error(
+                        new NotFoundException(HttpStatus.NOT_FOUND, "Workshop "+getWorkshop().name()+" returned 404")))
                 .map(XMLChangeTimesResponse::getAvailableTime)
                 .flatMapIterable(list -> list)
                 .map(s -> new AvailableChangeTime(ZonedDateTime.parse(s.getTime()), s.getUuid()))
