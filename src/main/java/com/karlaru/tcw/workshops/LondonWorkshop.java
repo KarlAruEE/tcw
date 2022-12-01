@@ -13,6 +13,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Service
 public class LondonWorkshop implements WorkshopInterface {
@@ -47,16 +48,19 @@ public class LondonWorkshop implements WorkshopInterface {
                 .uri(getUrl)
                 .accept(MediaType.TEXT_XML)
                 .retrieve()
+                .onStatus(HttpStatus::is4xxClientError,
+                        clientResponse -> Mono.error(
+                                new ApiException(clientResponse.statusCode().value(), "Bad request")))
                 .bodyToMono(XMLChangeTimesResponse.class)
-                .onErrorResume(clientResponse -> Mono.error(
-                        new NotFoundException(HttpStatus.NOT_FOUND, "Workshop "+getWorkshop().name()+" returned 404")))
                 .map(XMLChangeTimesResponse::getAvailableTime)
                 .flatMapIterable(list -> list)
                 .map(s -> new AvailableChangeTime(ZonedDateTime.parse(s.getTime()), s.getUuid()))
                 .map(m -> {
                     m.setWorkshop(workshop);
                     return m;
-                });
+                })
+                .onErrorMap(Predicate.not(ApiException.class::isInstance),
+                        throwable -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Remote REST api seems to be offline"));
     }
 
     @Override

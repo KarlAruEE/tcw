@@ -2,7 +2,6 @@ package com.karlaru.tcw.response.models;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.springframework.http.HttpStatus;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -14,9 +13,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @AllArgsConstructor
 @XmlRootElement(name = "errorResponse")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class NotFoundException extends Throwable{
+public class ApiException extends Throwable{
     @XmlElement(name = "statusCode")
-    private HttpStatus code;
+    private int code;
     @XmlElement(name = "error")
     private String message;
 

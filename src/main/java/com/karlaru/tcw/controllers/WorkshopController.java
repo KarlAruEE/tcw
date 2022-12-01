@@ -3,7 +3,7 @@ package com.karlaru.tcw.controllers;
 import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
-import com.karlaru.tcw.response.models.NotFoundException;
+import com.karlaru.tcw.response.models.ApiException;
 import com.karlaru.tcw.workshops.Workshop;
 import com.karlaru.tcw.workshops.WorkshopInterface;
 import lombok.AllArgsConstructor;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.util.List;
 
 @AllArgsConstructor
@@ -28,7 +27,7 @@ public class WorkshopController {
         return Flux.fromStream(workshopList.stream())
                 .map(WorkshopInterface::getWorkshop)
                 .switchIfEmpty(
-                        Flux.error(new NotFoundException(HttpStatus.NOT_FOUND, "Workshop list is empty!")));
+                        Flux.error(new ApiException(HttpStatus.NOT_FOUND.value(), "Workshop list is empty!")));
     }
 
     @GetMapping(value = "/{workshop}/tire-change-times")
@@ -52,8 +51,7 @@ public class WorkshopController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(Flux.fromStream(workshopsToGetTimesFor.stream())
-                        .flatMap(w ->  w.getAvailableChangeTime(from, until)
-                                        .onErrorComplete()));
+                        .flatMap(w ->  w.getAvailableChangeTime(from, until).onErrorComplete()));
     }
 
     @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
