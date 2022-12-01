@@ -51,6 +51,9 @@ public class ManchesterWorkshop implements WorkshopInterface {
 
         ZonedDateTime untilZonedDateTime = ZonedDateTime.parse(until + "T00:00:00Z");
 
+        if (untilZonedDateTime.isBefore(ZonedDateTime.parse(from+"T00:00:00Z")))
+            return Flux.error(new BadRequestException(HttpStatus.BAD_REQUEST.value(), "Until date is before from"));
+
         return webClient
                 .get()
                 .uri(getUrl)
