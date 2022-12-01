@@ -54,8 +54,7 @@ public class LondonWorkshop implements WorkshopInterface {
                 .accept(MediaType.TEXT_XML)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
-                        clientResponse -> Mono.error(
-                                new BadRequestException(clientResponse.statusCode().value(), "Bad request")))
+                        clientResponse -> clientResponse.bodyToMono(BadRequestException.class))
                 .bodyToMono(XMLChangeTimesResponse.class)
                 .map(XMLChangeTimesResponse::getAvailableTime)
                 .flatMapIterable(list -> list)

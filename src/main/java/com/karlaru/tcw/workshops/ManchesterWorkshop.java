@@ -17,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -47,11 +48,8 @@ public class ManchesterWorkshop implements WorkshopInterface {
     @Override
     public Flux<AvailableChangeTime> getAvailableChangeTime(String from, String until) {
         String getUrl = String.format("%s?from=%s", manchesterUrl, from);
-        ZonedDateTime untilZonedDateTime = ZonedDateTime.parse(until + "T00:00:00Z");
 
-        if(untilZonedDateTime.isBefore(ZonedDateTime.parse(from+ "T00:00:00Z"))){
-            return Flux.error(new BadRequestException(400, "From time is after Until time"));
-        }
+        ZonedDateTime untilZonedDateTime = ZonedDateTime.parse(until + "T00:00:00Z");
 
         return webClient
                 .get()
@@ -59,8 +57,7 @@ public class ManchesterWorkshop implements WorkshopInterface {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
-                        clientResponse -> Mono.error(
-                                new BadRequestException(clientResponse.statusCode().value(), "Bad request")))
+                        clientResponse -> clientResponse.bodyToMono(BadRequestException.class))
                 .bodyToFlux(AvailableChangeTime.class)
                 .map(m -> {
                     m.setWorkshop(workshop);
