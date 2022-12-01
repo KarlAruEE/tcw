@@ -1,4 +1,4 @@
-package com.karlaru.tcw.response.models;
+package com.karlaru.tcw.exceptions;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @AllArgsConstructor
 @XmlRootElement(name = "errorResponse")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ApiException extends Throwable{
+public class ErrorException extends Throwable{
     @XmlElement(name = "statusCode")
     private int code;
     @XmlElement(name = "error")

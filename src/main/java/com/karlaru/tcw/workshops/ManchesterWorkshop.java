@@ -1,10 +1,11 @@
 package com.karlaru.tcw.workshops;
 
 
+import com.karlaru.tcw.exceptions.ErrorException;
 import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
-import com.karlaru.tcw.response.models.ApiException;
+import com.karlaru.tcw.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
@@ -48,10 +49,6 @@ public class ManchesterWorkshop implements WorkshopInterface {
         String getUrl = String.format("%s?from=%s", manchesterUrl, from);
         ZonedDateTime untilZonedDateTime = ZonedDateTime.parse(until + "T00:00:00Z");
 
-        if (ZonedDateTime.parse(from+"T00:00:00Z").isAfter(untilZonedDateTime)) {
-            return Flux.error(new ApiException(400, "Bad request"));
-        }
-
         return webClient
                 .get()
                 .uri(getUrl)
@@ -59,15 +56,15 @@ public class ManchesterWorkshop implements WorkshopInterface {
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
                         clientResponse -> Mono.error(
-                                new ApiException(clientResponse.statusCode().value(), "Bad request")))
+                                new NotFoundException(clientResponse.statusCode().value(), "Bad request")))
                 .bodyToFlux(AvailableChangeTime.class)
                 .map(m -> {
                     m.setWorkshop(workshop);
                     return m;
                 })
                 .filter(f -> f.getTime().isBefore(untilZonedDateTime))
-                .onErrorMap(Predicate.not(ApiException.class::isInstance),
-                        throwable -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR.value(), workshop.name()+" REST api seems to be offline"));
+                .onErrorMap(Predicate.not(ErrorException.class::isInstance),
+                        throwable -> new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR.value(), workshop.name()+" REST api seems to be offline"));
     }
 
     @Override
