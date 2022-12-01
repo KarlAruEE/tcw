@@ -1,9 +1,9 @@
 package com.karlaru.tcw.controllers;
 
+import com.karlaru.tcw.response.models.ApiException;
 import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
-import com.karlaru.tcw.response.models.ApiException;
 import com.karlaru.tcw.workshops.Workshop;
 import com.karlaru.tcw.workshops.WorkshopInterface;
 import lombok.AllArgsConstructor;
@@ -47,11 +47,12 @@ public class WorkshopController {
                 .status(HttpStatus.NOT_FOUND)
                 .body(Flux.empty());
 
-        // Return available times for all matching workshops
+        Flux<AvailableChangeTime> responseBody = Flux.fromStream(workshopsToGetTimesFor.stream())
+                                                     .flatMap(w -> w.getAvailableChangeTime(from, until).onErrorComplete());
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(Flux.fromStream(workshopsToGetTimesFor.stream())
-                        .flatMap(w ->  w.getAvailableChangeTime(from, until).onErrorComplete()));
+                .body(responseBody);
     }
 
     @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
