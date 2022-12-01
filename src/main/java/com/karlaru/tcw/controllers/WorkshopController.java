@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 @AllArgsConstructor
 @RestController
@@ -42,11 +43,23 @@ public class WorkshopController {
                 .filter(w -> vehicle.equals("ALL") || w.getWorkshop().vehicles().contains(Workshop.VehicleType.valueOf(vehicle)))
                 .toList();
 
+        // Vehicle type incompatible with selected workshop
         if (workshopsToGetTimesFor.size() == 0)
             return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(Flux.empty());
 
+        // Get times for 1 workshop
+        else if (workshopsToGetTimesFor.size() == 1) {
+            Flux<AvailableChangeTime> responseBody = Flux.fromStream(workshopsToGetTimesFor.stream())
+                    .flatMap(w -> w.getAvailableChangeTime(from, until)).onErrorMap(Predicate.not(ApiException.class::isInstance),
+                            throwable -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR.value(), " REST api seems to be offline"));
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(responseBody);
+        }
+
+        // Get times for multiple workshops, errors will be silently discarded
         Flux<AvailableChangeTime> responseBody = Flux.fromStream(workshopsToGetTimesFor.stream())
                                                      .flatMap(w -> w.getAvailableChangeTime(from, until).onErrorComplete());
 

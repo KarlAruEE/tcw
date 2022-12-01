@@ -60,7 +60,7 @@ public class LondonWorkshop implements WorkshopInterface {
                     return m;
                 })
                 .onErrorMap(Predicate.not(ApiException.class::isInstance),
-                        throwable -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Remote REST api seems to be offline"));
+                        throwable -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR.value(), workshop.name()+" REST api seems to be offline"));
     }
 
     @Override
