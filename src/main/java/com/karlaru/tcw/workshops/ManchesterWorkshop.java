@@ -1,11 +1,11 @@
 package com.karlaru.tcw.workshops;
 
 
+import com.karlaru.tcw.exceptions.BadRequestException;
 import com.karlaru.tcw.exceptions.ErrorException;
 import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
-import com.karlaru.tcw.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
@@ -49,6 +49,10 @@ public class ManchesterWorkshop implements WorkshopInterface {
         String getUrl = String.format("%s?from=%s", manchesterUrl, from);
         ZonedDateTime untilZonedDateTime = ZonedDateTime.parse(until + "T00:00:00Z");
 
+        if(untilZonedDateTime.isBefore(ZonedDateTime.parse(from+ "T00:00:00Z"))){
+            return Flux.error(new BadRequestException(400, "From time is after Until time"));
+        }
+
         return webClient
                 .get()
                 .uri(getUrl)
@@ -56,14 +60,14 @@ public class ManchesterWorkshop implements WorkshopInterface {
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
                         clientResponse -> Mono.error(
-                                new NotFoundException(clientResponse.statusCode().value(), "Bad request")))
+                                new BadRequestException(clientResponse.statusCode().value(), "Bad request")))
                 .bodyToFlux(AvailableChangeTime.class)
                 .map(m -> {
                     m.setWorkshop(workshop);
                     return m;
                 })
                 .filter(f -> f.getTime().isBefore(untilZonedDateTime))
-                .onErrorMap(Predicate.not(ErrorException.class::isInstance),
+                .onErrorMap(Predicate.not(BadRequestException.class::isInstance),
                         throwable -> new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR.value(), workshop.name()+" REST api seems to be offline"));
     }
 

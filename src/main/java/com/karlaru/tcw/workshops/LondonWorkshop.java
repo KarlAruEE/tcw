@@ -1,9 +1,12 @@
 package com.karlaru.tcw.workshops;
 
 
+import com.karlaru.tcw.exceptions.BadRequestException;
 import com.karlaru.tcw.exceptions.ErrorException;
-import com.karlaru.tcw.exceptions.NotFoundException;
-import com.karlaru.tcw.response.models.*;
+import com.karlaru.tcw.response.models.AvailableChangeTime;
+import com.karlaru.tcw.response.models.Booking;
+import com.karlaru.tcw.response.models.ContactInformation;
+import com.karlaru.tcw.response.models.XMLChangeTimesResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
@@ -52,7 +55,7 @@ public class LondonWorkshop implements WorkshopInterface {
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
                         clientResponse -> Mono.error(
-                                new NotFoundException(clientResponse.statusCode().value(), "Bad request")))
+                                new BadRequestException(clientResponse.statusCode().value(), "Bad request")))
                 .bodyToMono(XMLChangeTimesResponse.class)
                 .map(XMLChangeTimesResponse::getAvailableTime)
                 .flatMapIterable(list -> list)
@@ -61,7 +64,7 @@ public class LondonWorkshop implements WorkshopInterface {
                     m.setWorkshop(workshop);
                     return m;
                 })
-                .onErrorMap(Predicate.not(ErrorException.class::isInstance),
+                .onErrorMap(Predicate.not(BadRequestException.class::isInstance),
                         throwable -> new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR.value(), workshop.name()+" REST api seems to be offline"));
     }
 
