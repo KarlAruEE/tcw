@@ -11,11 +11,6 @@ docker-compose up -d
 
 #### Simple JavaScript Front-end at [localhost:8080](http://localhost:8080)
 
-Stop
-```
-docker-compose down
-```
-
 ---
 
 ### Adding new workshops
@@ -25,19 +20,12 @@ docker-compose down
 
 ---
 
-### API
+### API Docs
 
-GET workshops
-```
-curl -X GET http://localhost:8080/api/v1/workshop
-```
+### [Swagger at localhost:8080](http://localhost:8080/swagger-ui.html)
 
-Get available times
+---
+### Stop
 ```
-curl -X GET http://localhost:8080/api/v1/workshop/{workshop}/tire-change-times?from={from}&until={until}&vehicle={vehicle}
-```
-
-Book time
-```
-curl -X POST -H "Content-Type: application/json" -d '{"contactInformation": "{contactinformation}"}' http://localhost:8080/api/v1/{workshop}/tire-change-times/{id}/booking
+docker-compose down
 ```
