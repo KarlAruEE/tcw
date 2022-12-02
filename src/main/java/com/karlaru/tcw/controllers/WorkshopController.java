@@ -49,19 +49,28 @@ public class WorkshopController {
     public ResponseEntity<Flux<AvailableChangeTime>> getAvailableTimes(@PathVariable List<String> workshop,
                                                                       @RequestParam String from,
                                                                       @RequestParam String until,
-                                                                      @RequestParam(required = false, defaultValue = "ALL") String vehicle){
+                                                                      @RequestParam List<String> vehicle){
 
         // Filter workshops by workshop name and vehicle type
         List<? extends WorkshopInterface> workshopsToGetTimesFor = workshopList.stream()
-                .filter(w -> workshop.contains("All") || workshop.contains(w.getWorkshop().name()))
-                .filter(w -> vehicle.equals("ALL") || w.getWorkshop().vehicles().contains(Workshop.VehicleType.valueOf(vehicle)))
+                .filter(w -> workshop.contains(w.getWorkshop().name()))
+                .filter(w -> {
+                    for (var avehicle: vehicle){
+                        if(w.getWorkshop().vehicles().contains(Workshop.VehicleType.valueOf(avehicle))) {
+                            System.out.println(w.getWorkshop().name() + " true " + avehicle);
+                            return true;
+                        }
+                    }
+                    System.out.println(w.getWorkshop().name()+" false "+ vehicle.toString());
+                    return false;
+                })
                 .toList();
 
         // Vehicle type incompatible with selected workshop
         if (workshopsToGetTimesFor.size() == 0)
             return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Flux.error(new NotFoundException(HttpStatus.BAD_REQUEST.value(), workshop.get(0) + " workshop doesn't change " + vehicle)));
+                .body(Flux.error(new NotFoundException(HttpStatus.BAD_REQUEST.value(), workshop.get(0) + " workshop doesn't change " + vehicle.toString())));
 
         // Get times for 1 workshop
         else if (workshopsToGetTimesFor.size() == 1) {

@@ -29,7 +29,7 @@ public class ManchesterWorkshop implements WorkshopInterface {
     private final WebClient webClient;
 
     private final Workshop workshop =
-            new Workshop("Manchester", "14 Bury New Rd, Manchester", List.of(Workshop.VehicleType.CAR, Workshop.VehicleType.TRUCK));
+            new Workshop("Manchester", "14 Bury New Rd, Manchester", List.of(Workshop.VehicleType.Car, Workshop.VehicleType.Truck));
 
     public ManchesterWorkshop(@Lazy WebClient webClient) {
         this.webClient = webClient;

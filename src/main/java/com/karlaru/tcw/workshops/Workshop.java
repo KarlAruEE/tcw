@@ -5,6 +5,6 @@ import java.util.List;
 
 public record Workshop(String name, String address, List<VehicleType> vehicles) {
     public enum VehicleType {
-        CAR, TRUCK
+        Car, Truck;
     }
 }

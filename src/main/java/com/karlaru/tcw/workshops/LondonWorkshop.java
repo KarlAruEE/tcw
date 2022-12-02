@@ -28,7 +28,7 @@ public class LondonWorkshop implements WorkshopInterface {
     private final WebClient webClient;
 
     private final Workshop workshop =
-            new Workshop("London", "1A Gunton Rd, London", List.of(Workshop.VehicleType.CAR));
+            new Workshop("London", "1A Gunton Rd, London", List.of(Workshop.VehicleType.Car));
 
     public LondonWorkshop(@Lazy WebClient webClient) {
         this.webClient = webClient;

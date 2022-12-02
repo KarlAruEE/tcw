@@ -8,18 +8,17 @@
 <body>
 <div class="container col-5">
     <h3 class="text-center">Tire Change Workshop</h3>
+    <p class="text-center text-secondary">Hold down the ctrl or cmd key to select more than one option in the list.</p>
     <form name="filter">
         <div class="row text-center" id="workshopLocations">
             <div class="col-6">
                 <label for="locationsSelect">Locations</label>
                 <select class="form-select" id="locationsSelect" multiple aria-label="multiple select example" onchange="renderAvailableTimes()">
-                    <option value="All" selected>All</option>
                 </select>
             </div>
             <div class="col-6">
                 <label for="vehicleSelect">Vehicles</label>
                 <select class="form-select" id="vehicleSelect" multiple aria-label="multiple select example" onchange="renderAvailableTimes()">
-                    <option value="ALL" selected>ALL</option>
                 </select>
             </div>
         </div>
@@ -91,6 +90,7 @@
         workshops.forEach(workshop => workshopLocations.add(workshop.name));
         await renderSelects(workshopLocations, "locationsSelect");
         await renderSelects(vehicleTypes, "vehicleSelect");
+        await renderAvailableTimes();
     }
 
     async function renderSelects(items, selectName){
@@ -100,6 +100,7 @@
             const option = document.createElement('option');
             option.value = element;
             option.innerHTML = element;
+            option.selected = true;
             select.appendChild(option)
         })
 
@@ -112,9 +113,14 @@
     async function getAvailableTimes(){
         const from = document.forms["filter"]["from"].value;
         const until = document.forms["filter"]["until"].value;
-        const location = document.forms["filter"]["locationsSelect"].value;
-        const vehicle = document.forms["filter"]["vehicleSelect"].value;
-
+        const location = Array.from(document.forms["filter"]["locationsSelect"]
+                                        .querySelectorAll('option:checked'))
+                                        .map(o => o.value)
+                                        .toString();
+        const vehicle = Array.from(document.forms["filter"]["vehicleSelect"]
+                                        .querySelectorAll('option:checked'))
+                                        .map(o => o.value)
+                                        .toString();
         const apiUrl = 'http://localhost:8080/api/v1/workshop/' + location + '/tire-change-times?from='+from+'&until='+until+'&vehicle='+vehicle;
 
         let errors = "";
@@ -166,7 +172,6 @@
         }
 
     }
-    document.addEventListener("DOMContentLoaded", renderAvailableTimes);
 </script>
 
 <!-- Book available time -->
