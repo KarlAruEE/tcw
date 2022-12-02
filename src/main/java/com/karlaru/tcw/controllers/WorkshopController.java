@@ -105,10 +105,10 @@ public class WorkshopController {
         if (bookWorkshop == null){
             return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(Mono.empty());
+                .body(Mono.error(new NotFoundException(HttpStatus.NOT_FOUND.value(), workshop + " not found" )));
         }
         return ResponseEntity
-                .status(HttpStatus.CREATED)
+                .status(HttpStatus.OK)
                 .body(bookWorkshop.bookChangeTime(id, contactInformation));
 
     }

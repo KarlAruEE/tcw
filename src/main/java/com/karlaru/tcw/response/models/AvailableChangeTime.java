@@ -2,7 +2,6 @@ package com.karlaru.tcw.response.models;
 
 
 import com.karlaru.tcw.workshops.Workshop;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

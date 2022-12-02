@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NoArgsConstructor
 @XmlRootElement(name = "errorResponse")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ErrorException extends Throwable{
+public class UnprocessableEntityException extends Throwable{
     @XmlElement(name = "statusCode")
     @JsonProperty("code")
     private int code;
@@ -21,7 +21,7 @@ public class ErrorException extends Throwable{
     @JsonProperty("message")
     private String message;
 
-    public ErrorException(int code, String message) {
+    public UnprocessableEntityException(int code, String message) {
         this.code = code;
         this.message = message;
     }

@@ -1,5 +1,9 @@
-package com.karlaru.tcw.exceptions;
+package com.karlaru.tcw.controllers;
 
+import com.karlaru.tcw.exceptions.BadRequestException;
+import com.karlaru.tcw.exceptions.ErrorException;
+import com.karlaru.tcw.exceptions.NotFoundException;
+import com.karlaru.tcw.exceptions.UnprocessableEntityException;
 import com.karlaru.tcw.response.models.ErrorResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,7 +42,20 @@ public class RestExceptionHandler {
         return ResponseEntity
                 .status(404)
                 .header("Content-Type", "application/json; charset=utf-8")
-                .body(notFoundException.getErrorResponse());
+                .body(notFoundException.getExceptionData());
+    }
+
+    @ExceptionHandler(UnprocessableEntityException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "422", description = "The tire change time has already been booked by another contact",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))})})
+    ResponseEntity<ErrorResponse> unprocessableEntity(UnprocessableEntityException unprocessableEntityException){
+        return ResponseEntity
+                .status(422)
+                .header("Content-Type", "application/json; charset=utf-8")
+                .body(unprocessableEntityException.getExceptionData());
     }
 
     @ExceptionHandler(ErrorException.class)
@@ -51,6 +68,6 @@ public class RestExceptionHandler {
         return ResponseEntity
                 .status(500)
                 .header("Content-Type", "application/json; charset=utf-8")
-                .body(errorException.getErrorResponse());
+                .body(errorException.getExceptionData());
     }
 }

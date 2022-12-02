@@ -3,6 +3,7 @@ package com.karlaru.tcw.workshops;
 
 import com.karlaru.tcw.exceptions.BadRequestException;
 import com.karlaru.tcw.exceptions.ErrorException;
+import com.karlaru.tcw.exceptions.UnprocessableEntityException;
 import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
@@ -76,10 +77,21 @@ public class LondonWorkshop implements WorkshopInterface {
                 .accept(MediaType.TEXT_XML)
                 .body(contactInformation, ContactInformation.class)
                 .retrieve()
+                .onStatus(HttpStatus::isError,
+                        clientResponse -> {
+                            if(clientResponse.statusCode().value()==HttpStatus.UNPROCESSABLE_ENTITY.value()) {
+                                return clientResponse.bodyToMono(UnprocessableEntityException.class);
+                            }
+                            else {
+                                return clientResponse.bodyToMono(BadRequestException.class);
+                            }
+                        })
                 .bodyToMono(Booking.class)
                 .map(booking -> {
                     booking.setWorkshop(workshop);
                     return booking;
-                });
+                })
+                .onErrorMap(Predicate.not(BadRequestException.class::isInstance).and(Predicate.not(UnprocessableEntityException.class::isInstance)),
+                        throwable -> new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR.value(), workshop.name()+" REST api seems to be offline"));
     }
 }
