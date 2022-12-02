@@ -113,17 +113,15 @@
     async function getAvailableTimes(){
         const from = document.forms["filter"]["from"].value;
         const until = document.forms["filter"]["until"].value;
-        const location = Array.from(document.forms["filter"]["locationsSelect"]
+        const locations = Array.from(document.forms["filter"]["locationsSelect"]
                                         .querySelectorAll('option:checked'))
                                         .map(o => o.value)
                                         .toString();
-        const vehicle = Array.from(document.forms["filter"]["vehicleSelect"]
+        const vehicles = Array.from(document.forms["filter"]["vehicleSelect"]
                                         .querySelectorAll('option:checked'))
                                         .map(o => o.value)
                                         .toString();
-        const apiUrl = 'http://localhost:8080/api/v1/workshop/' + location + '/tire-change-times?from='+from+'&until='+until+'&vehicle='+vehicle;
-
-        let errors = "";
+        const apiUrl = 'http://localhost:8080/api/v1/workshop/' + locations + '/tire-change-times?&vehicles='+vehicles+'&from='+from+'&until='+until;
 
         return fetch(apiUrl, {
             method: 'GET',

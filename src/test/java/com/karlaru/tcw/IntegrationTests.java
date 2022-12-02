@@ -13,7 +13,7 @@ public class IntegrationTests {
     @Test
     public void shouldReturnManchesterAvailableTimes(){
         webTestClient
-                .get().uri("/api/v1/workshop/Manchester/tire-change-times?from=2012-01-01&until=2023-01-01&vehicle=Truck")
+                .get().uri("/api/v1/workshop/Manchester/tire-change-times?from=2012-01-01&until=2023-01-01&vehicles=Truck")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -23,7 +23,7 @@ public class IntegrationTests {
     @Test
     public void shouldReturnLondonAvailableTimes(){
         webTestClient
-                .get().uri("/api/v1/workshop/London/tire-change-times?from=2012-01-01&until=2023-01-01&vehicle=Car")
+                .get().uri("/api/v1/workshop/London/tire-change-times?from=2012-01-01&until=2023-01-01&vehicles=Car")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -33,7 +33,7 @@ public class IntegrationTests {
     @Test
     public void shouldReturnAllAvailableTimes(){
         webTestClient
-                .get().uri("/api/v1/workshop/London,Manchester/tire-change-times?from=2012-01-01&until=2023-01-01&vehicle=Car")
+                .get().uri("/api/v1/workshop/London,Manchester/tire-change-times?from=2012-01-01&until=2023-01-01&vehicles=Car")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()

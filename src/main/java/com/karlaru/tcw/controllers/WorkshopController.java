@@ -1,5 +1,6 @@
 package com.karlaru.tcw.controllers;
 
+import com.karlaru.tcw.exceptions.BadRequestException;
 import com.karlaru.tcw.exceptions.ErrorException;
 import com.karlaru.tcw.exceptions.NotFoundException;
 import com.karlaru.tcw.response.models.AvailableChangeTime;
@@ -45,23 +46,21 @@ public class WorkshopController {
     @Operation(summary = "Search for available times")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK",
             content = { @Content(mediaType = "application/json", schema = @Schema(implementation = AvailableChangeTime.class))})})
-    @GetMapping(value = "/{workshop}/tire-change-times")
-    public ResponseEntity<Flux<AvailableChangeTime>> getAvailableTimes(@PathVariable List<String> workshop,
-                                                                      @RequestParam String from,
-                                                                      @RequestParam String until,
-                                                                      @RequestParam List<String> vehicle){
+    @GetMapping(value = "/{workshops}/tire-change-times")
+    public ResponseEntity<Flux<AvailableChangeTime>> getAvailableTimes(@PathVariable List<String> workshops,
+                                                                       @RequestParam(defaultValue = "Car,Truck") List<String> vehicles,
+                                                                       @RequestParam String from,
+                                                                       @RequestParam String until){
 
         // Filter workshops by workshop name and vehicle type
         List<? extends WorkshopInterface> workshopsToGetTimesFor = workshopList.stream()
-                .filter(w -> workshop.contains(w.getWorkshop().name()))
+                .filter(w -> workshops.contains(w.getWorkshop().name()))
                 .filter(w -> {
-                    for (var avehicle: vehicle){
-                        if(w.getWorkshop().vehicles().contains(Workshop.VehicleType.valueOf(avehicle))) {
-                            System.out.println(w.getWorkshop().name() + " true " + avehicle);
+                    for (var vehicle: vehicles){
+                        if(w.getWorkshop().vehicles().contains(Workshop.VehicleType.valueOf(vehicle))) {
                             return true;
                         }
                     }
-                    System.out.println(w.getWorkshop().name()+" false "+ vehicle.toString());
                     return false;
                 })
                 .toList();
@@ -70,7 +69,7 @@ public class WorkshopController {
         if (workshopsToGetTimesFor.size() == 0)
             return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Flux.error(new NotFoundException(HttpStatus.BAD_REQUEST.value(), workshop.get(0) + " workshop doesn't change " + vehicle.toString())));
+                .body(Flux.error(new BadRequestException(HttpStatus.BAD_REQUEST.value(), workshops.get(0) + " workshop doesn't change " + vehicles.toString())));
 
         // Get times for 1 workshop
         else if (workshopsToGetTimesFor.size() == 1) {
@@ -95,7 +94,7 @@ public class WorkshopController {
             content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Booking.class))})})
     @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
     public ResponseEntity<Mono<Booking>> bookAvailableTime(@PathVariable String workshop,
-                                                           @PathVariable Object id,
+                                                           @PathVariable String id,
                                                            @RequestBody Mono<ContactInformation> contactInformation){
 
         WorkshopInterface bookWorkshop = workshopList.stream()
