@@ -92,7 +92,7 @@ public class WorkshopController {
     @Operation(summary = "Book available time")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK",
             content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Booking.class))})})
-    @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
+    @PutMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
     public ResponseEntity<Mono<Booking>> bookAvailableTime(@PathVariable String workshop,
                                                            @PathVariable String id,
                                                            @RequestBody Mono<ContactInformation> contactInformation){

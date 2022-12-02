@@ -193,7 +193,7 @@
         dict['contactInformation'] = contactInformation;
         const body = JSON.stringify(dict);
         return fetch(apiUrl, {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
