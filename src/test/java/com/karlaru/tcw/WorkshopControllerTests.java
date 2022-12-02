@@ -22,11 +22,11 @@ public class WorkshopControllerTests {
                     .jsonPath("$").isNotEmpty()
                     .jsonPath("$[0].name").isEqualTo("London")
                     .jsonPath("$[0].address").isEqualTo("1A Gunton Rd, London")
-                    .jsonPath("$[0].vehicles").isEqualTo("CAR")
+                    .jsonPath("$[0].vehicles").isEqualTo("Car")
                     .jsonPath("$[1].name").isEqualTo("Manchester")
                     .jsonPath("$[1].address").isEqualTo("14 Bury New Rd, Manchester")
                     .jsonPath("$[1].vehicles").isArray()
-                    .jsonPath("$[1].vehicles[0]").isEqualTo("CAR")
-                    .jsonPath("$[1].vehicles[1]").isEqualTo("TRUCK");
+                    .jsonPath("$[1].vehicles[0]").isEqualTo("Car")
+                    .jsonPath("$[1].vehicles[1]").isEqualTo("Truck");
     }
 }
