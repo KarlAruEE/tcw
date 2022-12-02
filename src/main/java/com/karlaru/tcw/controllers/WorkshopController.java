@@ -83,7 +83,7 @@ public class WorkshopController {
 
         // Get times for multiple workshops, errors will be silently discarded
         Flux<AvailableChangeTime> responseBody = Flux.fromStream(workshopsToGetTimesFor.stream())
-                                                     .flatMap(w -> w.getAvailableChangeTime(from, until).onErrorComplete());
+                                                     .flatMap(w -> w.getAvailableChangeTime(from, until));
 
         return ResponseEntity
                 .status(HttpStatus.OK)
