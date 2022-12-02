@@ -1,11 +1,19 @@
 package com.karlaru.tcw.controllers;
 
+import com.karlaru.tcw.exceptions.BadRequestException;
+import com.karlaru.tcw.exceptions.ErrorException;
+import com.karlaru.tcw.exceptions.ExceptionImplementation;
 import com.karlaru.tcw.exceptions.NotFoundException;
 import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
 import com.karlaru.tcw.workshops.Workshop;
 import com.karlaru.tcw.workshops.WorkshopInterface;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 @AllArgsConstructor
 @RestController
@@ -22,12 +31,25 @@ public class WorkshopController {
 
     private final List<? extends WorkshopInterface> workshopList;
 
+    @Operation(summary = "Get all workshops")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AvailableChangeTime.class))}),
+            @ApiResponse(responseCode = "404", description = "Not Found",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionImplementation.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionImplementation.class))})})
     @GetMapping
     public Flux<Workshop> getWorkshops(){
         return Flux.fromStream(workshopList.stream())
                 .map(WorkshopInterface::getWorkshop)
                 .switchIfEmpty(
-                        Flux.error(new NotFoundException(HttpStatus.NOT_FOUND.value(), "Workshop list is empty!")));
+                        Flux.error(new NotFoundException(HttpStatus.NOT_FOUND.value(), "Workshop list is empty!")))
+                .onErrorMap(Predicate.not(NotFoundException.class::isInstance),
+                        throwable -> new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Something went terribly wrong!"));
     }
 
     @GetMapping(value = "/{workshop}/tire-change-times")
