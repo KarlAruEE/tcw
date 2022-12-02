@@ -1,5 +1,6 @@
 package com.karlaru.tcw.exceptions;
 
+import com.karlaru.tcw.response.models.ErrorResponse;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -19,9 +20,13 @@ public class ErrorException extends Throwable{
     @XmlElement(name = "error")
     private String message;
 
-    public String response(){
-        return "{\"code\":\""+code+"\"," +
-                "\"message\":\""+message+"\"}";
+    private ErrorResponse errorResponse;
+
+    public ErrorException(int code, String message) {
+        this.errorResponse = new ErrorResponse(code, message);
+    }
+    public ErrorResponse getErrorResponse(){
+        return this.errorResponse;
     }
 
 }

@@ -71,12 +71,12 @@ public class ManchesterWorkshopTest {
         StepVerifier
                 .create(response)
                 .expectNextMatches(e ->
-                                e.getId() == testTime1.getId() &&
+                                e.getId().equals(testTime1.getId()) &&
                                 e.isAvailable() &&
                                 e.getWorkshop() == testTime1.getWorkshop() &&
                                 e.getTime().isEqual(testTime1.getTime()))
                 .expectNextMatches(e ->
-                                e.getId() == testTime2.getId() &&
+                                e.getId().equals(testTime2.getId()) &&
                                 !e.isAvailable() &&
                                 e.getWorkshop() == testTime2.getWorkshop() &&
                                 e.getTime().isEqual(testTime2.getTime()))

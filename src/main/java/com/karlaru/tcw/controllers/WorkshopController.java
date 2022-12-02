@@ -1,8 +1,6 @@
 package com.karlaru.tcw.controllers;
 
-import com.karlaru.tcw.exceptions.BadRequestException;
 import com.karlaru.tcw.exceptions.ErrorException;
-import com.karlaru.tcw.exceptions.ExceptionImplementation;
 import com.karlaru.tcw.exceptions.NotFoundException;
 import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
@@ -31,17 +29,9 @@ public class WorkshopController {
 
     private final List<? extends WorkshopInterface> workshopList;
 
-    @Operation(summary = "Get all workshops")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = AvailableChangeTime.class))}),
-            @ApiResponse(responseCode = "404", description = "Not Found",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ExceptionImplementation.class))}),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ExceptionImplementation.class))})})
+    @Operation(summary = "Get available workshops")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK",
+            content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Workshop.class))})})
     @GetMapping
     public Flux<Workshop> getWorkshops(){
         return Flux.fromStream(workshopList.stream())
@@ -52,6 +42,9 @@ public class WorkshopController {
                         throwable -> new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Something went terribly wrong!"));
     }
 
+    @Operation(summary = "Search for available times")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK",
+            content = { @Content(mediaType = "application/json", schema = @Schema(implementation = AvailableChangeTime.class))})})
     @GetMapping(value = "/{workshop}/tire-change-times")
     public ResponseEntity<Flux<AvailableChangeTime>> getAvailableTimes(@PathVariable List<String> workshop,
                                                                       @RequestParam String from,

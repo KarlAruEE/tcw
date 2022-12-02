@@ -65,7 +65,7 @@ public class LondonWorkshopTest {
         StepVerifier
                 .create(response)
                 .expectNextMatches(e ->
-                                e.getUuid().equals(testTime.getUuid()) &&
+                                e.getId().equals(testTime.getId()) &&
                                 e.isAvailable() &&
                                 e.getWorkshop() == testTime.getWorkshop() &&
                                 e.getTime().isEqual(testTime.getTime()))
@@ -93,7 +93,7 @@ public class LondonWorkshopTest {
         StepVerifier
                 .create(response)
                 .expectNextMatches(e ->
-                                e.getId().equals(testTime.getUuid()) &&
+                                e.getId().equals(testTime.getId()) &&
                                 ZonedDateTime.parse(e.getTime()).isEqual(testTime.getTime()))
                 .verifyComplete();
     }

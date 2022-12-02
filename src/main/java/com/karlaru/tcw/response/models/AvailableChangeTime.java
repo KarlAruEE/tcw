@@ -11,22 +11,27 @@ import java.time.ZonedDateTime;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class AvailableChangeTime {
 
     private Workshop workshop;
     private boolean available;
-    private String uuid;
-    private int id;
+    private String id;
     private ZonedDateTime time;
+
+    public AvailableChangeTime(Workshop workshop, boolean available, String id, ZonedDateTime time) {
+        this.workshop = workshop;
+        this.available = available;
+        this.id = id;
+        this.time = time;
+    }
 
     // Manchester
     public AvailableChangeTime(boolean available, int id, ZonedDateTime time) {
-        this(null, available, null, id, time);
+        this(null, available, String.valueOf(id), time);
     }
 
     // London
     public AvailableChangeTime(ZonedDateTime time, String uuid) {
-        this(null, true, uuid, -1, time);
+        this(null, true, uuid, time);
     }
 }
