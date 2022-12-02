@@ -56,7 +56,7 @@ public class WorkshopController {
         List<? extends WorkshopInterface> workshopsToGetTimesFor = workshopList.stream()
                 .filter(w -> workshops.contains(w.getWorkshop().name()))
                 .filter(w -> {
-                    for (var vehicle: vehicles){
+                    for (String vehicle: vehicles){
                         if(w.getWorkshop().vehicles().contains(Workshop.VehicleType.valueOf(vehicle))) {
                             return true;
                         }
@@ -81,7 +81,7 @@ public class WorkshopController {
                     .body(responseBody);
         }
 
-        // Get times for multiple workshops, errors will be silently discarded
+        // Get times for multiple workshops
         Flux<AvailableChangeTime> responseBody = Flux.fromStream(workshopsToGetTimesFor.stream())
                                                      .flatMap(w -> w.getAvailableChangeTime(from, until));
 
