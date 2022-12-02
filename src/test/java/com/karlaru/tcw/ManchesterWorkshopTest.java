@@ -104,7 +104,7 @@ public class ManchesterWorkshopTest {
         StepVerifier
                 .create(response)
                 .expectNextMatches(e ->
-                                e.getId() == testTime.getId() &&
+                                e.getId().equals(String.valueOf(testTime.getId())) &&
                                 !e.isAvailable() &&
                                 ZonedDateTime.parse(e.getTime()).isEqual(testTime.getTime()))
                 .verifyComplete();

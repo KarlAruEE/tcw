@@ -178,7 +178,10 @@
             return false;
         }
         const response = await bookAvailableTime(id, workshopName, contactInformation);
-        alert("Success\n"+JSON.stringify(response));
+        const responseString = "Workshop: " + response.workshop.name + "\n" +
+                               "Time: " + new Date(response['time']).toLocaleString('et-EE') + "\n" +
+                               "ID: " + response['id'];
+        alert("Booking Successful!\n\n"+responseString);
         await renderAvailableTimes();
     }
     async function bookAvailableTime(id, workshopName, contactInformation) {

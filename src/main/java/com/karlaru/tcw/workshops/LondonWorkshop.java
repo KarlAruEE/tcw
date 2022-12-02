@@ -76,6 +76,10 @@ public class LondonWorkshop implements WorkshopInterface {
                 .accept(MediaType.TEXT_XML)
                 .body(contactInformation, ContactInformation.class)
                 .retrieve()
-                .bodyToMono(Booking.class);
+                .bodyToMono(Booking.class)
+                .map(booking -> {
+                    booking.setWorkshop(workshop);
+                    return booking;
+                });
     }
 }

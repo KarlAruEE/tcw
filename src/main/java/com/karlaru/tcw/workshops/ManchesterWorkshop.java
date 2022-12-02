@@ -80,6 +80,10 @@ public class ManchesterWorkshop implements WorkshopInterface {
                 .accept(MediaType.APPLICATION_JSON)
                 .body(contactInformation, ContactInformation.class)
                 .retrieve()
-                .bodyToMono(Booking.class);
+                .bodyToMono(Booking.class)
+                .map(booking -> {
+                    booking.setWorkshop(workshop);
+                    return booking;
+                });
     }
 }

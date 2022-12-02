@@ -1,5 +1,6 @@
 package com.karlaru.tcw.response.models;
 
+import com.karlaru.tcw.workshops.Workshop;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,21 +15,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Booking {
     private boolean available;
-    private int id;
     @XmlElement(name = "time")
     private String time;
     @XmlElement(name = "uuid")
-    private String uuid;
+    private String id;
+    private Workshop workshop;
 
 
-    public Booking(String time, String uuid) {
+    public Booking(String time, String id) {
+        this.available = false;
         this.time = time;
-        this.uuid = uuid;
+        this.id = id;
     }
 
     public Booking(boolean available, int id, String time) {
         this.available = available;
-        this.id = id;
+        this.id = String.valueOf(id);
         this.time = time;
     }
 }
