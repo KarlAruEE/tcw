@@ -81,7 +81,9 @@ public class WorkshopController {
                 .status(HttpStatus.OK)
                 .body(responseBody);
     }
-
+    @Operation(summary = "Book available time")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK",
+            content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Booking.class))})})
     @PostMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
     public ResponseEntity<Mono<Booking>> bookAvailableTime(@PathVariable String workshop,
                                                            @PathVariable Object id,
