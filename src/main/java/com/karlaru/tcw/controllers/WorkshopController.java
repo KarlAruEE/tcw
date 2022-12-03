@@ -48,12 +48,40 @@ public class WorkshopController {
             content = { @Content(mediaType = "application/json", schema = @Schema(implementation = AvailableChangeTime.class))})})
     @GetMapping(value = "/{workshops}/tire-change-times")
     public ResponseEntity<Flux<AvailableChangeTime>> getAvailableTimes(@PathVariable List<String> workshops,
-                                                                       @RequestParam(defaultValue = "Car,Truck") List<String> vehicles,
+                                                                       @RequestParam List<String> vehicles,
                                                                        @RequestParam String from,
                                                                        @RequestParam String until){
 
-        // Filter workshops by workshop name and vehicle type
-        List<? extends WorkshopInterface> workshopsToGetTimesFor = workshopList.stream()
+        List<? extends WorkshopInterface> workshopsToGetTimesFor = getWorkshops(workshops, vehicles);
+
+        if (workshopsToGetTimesFor.size() == 0)
+            return getResponseNoWorkshop(workshops, vehicles);
+
+        else
+            return getResponseManyWorkshop(from, until, workshopsToGetTimesFor);
+
+    }
+
+    private static ResponseEntity<Flux<AvailableChangeTime>> getResponseManyWorkshop(String from, String until, List<? extends WorkshopInterface> workshopsToGetTimesFor) {
+        Flux<AvailableChangeTime> responseBody = Flux.fromStream(workshopsToGetTimesFor.stream())
+                .flatMap(w -> w.getAvailableChangeTime(from, until));
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseBody);
+    }
+
+    private static ResponseEntity<Flux<AvailableChangeTime>> getResponseNoWorkshop(List<String> workshops, List<String> vehicles) {
+        Flux<AvailableChangeTime> responseBody = Flux.error(
+                new BadRequestException(HttpStatus.BAD_REQUEST.value(), workshops + " workshop doesn't change " + vehicles));
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseBody);
+    }
+
+    private List<? extends WorkshopInterface> getWorkshops(List<String> workshops, List<String> vehicles) {
+        return workshopList.stream()
                 .filter(w -> workshops.contains(w.getWorkshop().name()))
                 .filter(w -> {
                     for (String vehicle: vehicles){
@@ -64,31 +92,8 @@ public class WorkshopController {
                     return false;
                 })
                 .toList();
-
-        // Vehicle type incompatible with selected workshop
-        if (workshopsToGetTimesFor.size() == 0)
-            return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(Flux.error(new BadRequestException(HttpStatus.BAD_REQUEST.value(), workshops.get(0) + " workshop doesn't change " + vehicles.toString())));
-
-        // Get times for 1 workshop
-        else if (workshopsToGetTimesFor.size() == 1) {
-            Flux<AvailableChangeTime> responseBody = Flux.fromStream(workshopsToGetTimesFor.stream())
-                    .flatMap(w -> w.getAvailableChangeTime(from, until));
-
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(responseBody);
-        }
-
-        // Get times for multiple workshops
-        Flux<AvailableChangeTime> responseBody = Flux.fromStream(workshopsToGetTimesFor.stream())
-                                                     .flatMap(w -> w.getAvailableChangeTime(from, until));
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(responseBody);
     }
+
     @Operation(summary = "Book available time")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK",
             content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Booking.class))})})
