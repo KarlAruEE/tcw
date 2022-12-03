@@ -29,3 +29,23 @@ docker-compose up -d
 ```
 docker-compose down
 ```
+
+---
+### Tests
+
+Controller
+- [X] Get list of workshops
+- [X] Return 404 when no workshops found
+- [X] Return 404 when queried workshop is not found
+- [X] Return 400 when queried workshop doesn't change queried vehicle type
+- [X] Return 400 when invalid date format
+- [X] Return 400 when from date is after until date
+- [X] Return correct available times filtering by workshops
+- [X] Return correct available times filtering by vehicle types 
+
+Workshop London
+
+Workshop Manchester
+
+Integration
+

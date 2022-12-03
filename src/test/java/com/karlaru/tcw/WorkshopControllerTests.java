@@ -160,7 +160,7 @@ public class WorkshopControllerTests {
         StepVerifier
                 .create(changeTimeFlux)
                 .expectErrorMatches(throwable -> throwable instanceof BadRequestException &&
-                        throwable.getMessage().equals("From date is before Until date"))
+                        throwable.getMessage().equals("From date is after Until date"))
                 .verify();
 
     }
@@ -174,7 +174,7 @@ public class WorkshopControllerTests {
                         new AvailableChangeTime(ZonedDateTime.parse("2022-12-01T11:10:10Z"),"IX-02"));
 
         Flux<AvailableChangeTime> changeTimeFlux =
-                workshopController.getAvailableTimes(List.of("Test WS 1","Test WS 3"), List.of("Car"), "2022-12-01", "2022-12-02");
+                workshopController.getAvailableTimes(List.of("Test WS 1","Test WS 3"), List.of("Car", "Truck"), "2022-12-01", "2022-12-02");
 
         StepVerifier
                 .create(changeTimeFlux)

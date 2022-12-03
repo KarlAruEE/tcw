@@ -90,7 +90,7 @@ public class WorkshopController {
             ZonedDateTime untilZDT = ZonedDateTime.parse(until + "T00:00:00Z");
             if (untilZDT.isBefore(fromZDT)) {
                 return Flux.error(
-                        new BadRequestException(HttpStatus.BAD_REQUEST.value(), "From date is before Until date"));
+                        new BadRequestException(HttpStatus.BAD_REQUEST.value(), "From date is after Until date"));
             }
         }catch (Exception e){
             return Flux.error(new BadRequestException(HttpStatus.BAD_REQUEST.value(), "Invalid date format"));
