@@ -72,7 +72,7 @@ public class ManchesterWorkshop implements WorkshopInterface {
     }
 
     @Override
-    public Mono<Booking> bookChangeTime(Object id, Mono<ContactInformation> contactInformation) {
+    public Mono<Booking> bookChangeTime(String id, Mono<ContactInformation> contactInformation) {
         return webClient
                 .post()
                 .uri(manchesterUrl+"/{id}/booking", id)

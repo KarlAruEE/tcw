@@ -22,6 +22,7 @@ public class UnprocessableEntityException extends Throwable{
     private String message;
 
     public UnprocessableEntityException(int code, String message) {
+        super(message);
         this.code = code;
         this.message = message;
     }

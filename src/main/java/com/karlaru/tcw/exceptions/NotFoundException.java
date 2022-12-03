@@ -22,6 +22,7 @@ public class NotFoundException extends Throwable{
     private String message;
 
     public NotFoundException(int code, String message) {
+        super(message);
         this.code = code;
         this.message = message;
     }

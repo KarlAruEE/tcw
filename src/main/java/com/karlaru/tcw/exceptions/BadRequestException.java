@@ -22,6 +22,7 @@ public class BadRequestException extends Throwable{
     private String message;
 
     public BadRequestException(int code, String message) {
+        super(message);
         this.code = code;
         this.message = message;
     }

@@ -99,7 +99,7 @@ public class ManchesterWorkshopTest {
                 .setHeader("Content-Type", "application/json; charset=utf-8")
                 .setBody(remoteApiResponse));
 
-        Mono<Booking> response = manchesterWorkshop.bookChangeTime(5, Mono.just(contactInformation));
+        Mono<Booking> response = manchesterWorkshop.bookChangeTime("5", Mono.just(contactInformation));
 
         StepVerifier
                 .create(response)

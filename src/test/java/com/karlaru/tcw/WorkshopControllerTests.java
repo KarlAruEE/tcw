@@ -1,32 +1,154 @@
 package com.karlaru.tcw;
 
+import com.karlaru.tcw.controllers.WorkshopController;
+import com.karlaru.tcw.exceptions.BadRequestException;
+import com.karlaru.tcw.exceptions.NotFoundException;
+import com.karlaru.tcw.response.models.AvailableChangeTime;
+import com.karlaru.tcw.response.models.Booking;
+import com.karlaru.tcw.response.models.ContactInformation;
+import com.karlaru.tcw.workshops.Workshop;
+import com.karlaru.tcw.workshops.WorkshopInterface;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import java.time.ZonedDateTime;
+import java.util.List;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class WorkshopControllerTests {
 
-    @Autowired
-    private WebTestClient webTestClient;
+    private final WorkshopController workshopController = new WorkshopController(List.of(
+            new WorkshopInterface() {
+                @Override
+                public Workshop getWorkshop() {
+                    return new Workshop("Test WS 1", "Loc 1", List.of(Workshop.VehicleType.Car));
+                }
+
+                @Override
+                public Flux<AvailableChangeTime> getAvailableChangeTime(String from, String until) {
+                    return Flux.fromIterable(List.of(
+                            new AvailableChangeTime(ZonedDateTime.parse("2022-12-01T10:00:00Z"),"ID-01"),
+                            new AvailableChangeTime(ZonedDateTime.parse("2022-12-01T11:10:10Z"),"ID-02")));
+                }
+
+                @Override
+                public Mono<Booking> bookChangeTime(String id, Mono<ContactInformation> contactInformation) {
+                    return Mono.just(new Booking("2022-12-01T10:00:00Z","ID-01"));
+                }
+            },
+            new WorkshopInterface() {
+                @Override
+                public Workshop getWorkshop() {
+                    return new Workshop("Test WS 2", "Loc 2", List.of(Workshop.VehicleType.Truck));
+                }
+
+                @Override
+                public Flux<AvailableChangeTime> getAvailableChangeTime(String from, String until) {
+                    return Flux.fromIterable(List.of(
+                            new AvailableChangeTime(ZonedDateTime.parse("2022-12-02T10:00:00Z"),"I-01"),
+                            new AvailableChangeTime(ZonedDateTime.parse("2022-12-02T11:10:10Z"),"I-02")));
+                }
+
+                @Override
+                public Mono<Booking> bookChangeTime(String id, Mono<ContactInformation> contactInformation) {
+                    return Mono.just(new Booking("2022-12-02T10:00:00Z","I-01"));
+                }
+            },
+            new WorkshopInterface() {
+                @Override
+                public Workshop getWorkshop() {
+                    return new Workshop("Test WS 3", "Loc 3", List.of(Workshop.VehicleType.Car,
+                                                                                    Workshop.VehicleType.Truck));
+                }
+
+                @Override
+                public Flux<AvailableChangeTime> getAvailableChangeTime(String from, String until) {
+                    return Flux.fromIterable(List.of(
+                            new AvailableChangeTime(ZonedDateTime.parse("2022-12-01T10:00:00Z"),"IX-01"),
+                            new AvailableChangeTime(ZonedDateTime.parse("2022-12-01T11:10:10Z"),"IX-02")));
+                }
+
+                @Override
+                public Mono<Booking> bookChangeTime(String id, Mono<ContactInformation> contactInformation) {
+                    return Mono.just(new Booking("2022-12-01T10:00:00Z","IX-01"));
+                }
+            }
+
+    ));
+    private final WorkshopController emptyWorkshopController = new WorkshopController(List.of());
+
 
     @Test
-    public void shouldReturnWorkshopList(){
-        webTestClient
-                .get().uri("/api/v1/workshop")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                    .jsonPath("$").isArray()
-                    .jsonPath("$").isNotEmpty()
-                    .jsonPath("$[0].name").isEqualTo("London")
-                    .jsonPath("$[0].address").isEqualTo("1A Gunton Rd, London")
-                    .jsonPath("$[0].vehicles").isEqualTo("Car")
-                    .jsonPath("$[1].name").isEqualTo("Manchester")
-                    .jsonPath("$[1].address").isEqualTo("14 Bury New Rd, Manchester")
-                    .jsonPath("$[1].vehicles").isArray()
-                    .jsonPath("$[1].vehicles[0]").isEqualTo("Car")
-                    .jsonPath("$[1].vehicles[1]").isEqualTo("Truck");
+    void shouldGetWorkshops(){
+        Flux<Workshop> response = workshopController.getWorkshops();
+
+        StepVerifier
+                .create(response)
+                .expectNextMatches(w -> w.name().equals("Test WS 1") &&
+                                        w.address().equals("Loc 1") &&
+                                        w.vehicles().contains(Workshop.VehicleType.Car))
+                .expectNextMatches(w -> w.name().equals("Test WS 2") &&
+                                        w.address().equals("Loc 2") &&
+                                        w.vehicles().contains(Workshop.VehicleType.Truck))
+                .expectNextMatches(w -> w.name().equals("Test WS 3") &&
+                                        w.address().equals("Loc 3") &&
+                                        w.vehicles().contains(Workshop.VehicleType.Car) &&
+                                        w.vehicles().contains(Workshop.VehicleType.Truck))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnWorkshopListEmpty(){
+        Flux<Workshop> response = emptyWorkshopController.getWorkshops();
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                                                 throwable.getMessage().contains("Workshop list is empty!"))
+                .verify();
+    }
+
+    @Test
+    public void shouldReturnNoWorkshops(){
+        Flux<AvailableChangeTime> changeTimeFlux =
+                workshopController.getAvailableTimes(
+                        List.of("Wrong Workshop"), List.of("Car"), "2022-11-01", "2022-11-02");
+
+        StepVerifier
+                .create(changeTimeFlux)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().equals("Workshop [Wrong Workshop] is not found"))
+                .verify();
+
+    }
+
+    @Test
+    public void shouldReturnWrongVehicle(){
+        Flux<AvailableChangeTime> changeTimeFlux =
+                workshopController.getAvailableTimes(
+                        List.of("Test WS 2"), List.of("Tractor", "Van"), "2022-11-01", "2022-11-02");
+
+        StepVerifier
+                .create(changeTimeFlux)
+                .expectErrorMatches(throwable -> throwable instanceof BadRequestException &&
+                                    throwable.getMessage().equals("[Test WS 2] workshop doesn't change [Tractor, Van]"))
+                .verify();
+
+    }
+
+    @Test
+    public void shouldReturnWrongDate(){
+        Flux<AvailableChangeTime> changeTimeFlux =
+                workshopController.getAvailableTimes(List.of("Test WS 3"), List.of("Car"), "2022-11-01", "2022-11-2");
+
+        StepVerifier
+                .create(changeTimeFlux)
+                .expectErrorMatches(throwable -> throwable instanceof BadRequestException &&
+                        throwable.getMessage().equals("Invalid date format"))
+                .verify();
+
     }
 }

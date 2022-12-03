@@ -22,6 +22,7 @@ public class ErrorException extends Throwable{
     private String message;
 
     public ErrorException(int code, String message) {
+        super(message);
         this.code = code;
         this.message = message;
     }

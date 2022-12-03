@@ -10,6 +10,6 @@ public interface WorkshopInterface {
 
     Workshop getWorkshop();
     Flux<AvailableChangeTime> getAvailableChangeTime(String from, String until);
-    Mono<Booking> bookChangeTime(Object id, Mono<ContactInformation> contactInformation);
-    void setMockUrl(String mockUrl);
+    Mono<Booking> bookChangeTime(String id, Mono<ContactInformation> contactInformation);
+    default void setMockUrl(String mockUrl){}
 }
