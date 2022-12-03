@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.function.Predicate;
@@ -94,8 +93,7 @@ public class WorkshopController {
                         new BadRequestException(HttpStatus.BAD_REQUEST.value(), "From date is before Until date"));
             }
         }catch (Exception e){
-            return Flux.error(
-                    new BadRequestException(HttpStatus.BAD_REQUEST.value(), "Invalid date format"));
+            return Flux.error(new BadRequestException(HttpStatus.BAD_REQUEST.value(), "Invalid date format"));
         }
 
         // Return aggregated data for 1 or more workshops
