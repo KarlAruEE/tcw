@@ -58,6 +58,7 @@ public class LondonWorkshop implements WorkshopInterface {
                         clientResponse -> clientResponse.bodyToMono(BadRequestException.class))
                 .bodyToMono(XMLChangeTimesResponse.class)
                 .map(XMLChangeTimesResponse::getAvailableTime)
+                .onErrorComplete()
                 .flatMapIterable(list -> list)
                 .map(s -> new AvailableChangeTime(ZonedDateTime.parse(s.getTime()), s.getUuid()))
                 .map(m -> {

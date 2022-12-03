@@ -140,7 +140,7 @@ public class WorkshopControllerTests {
     }
 
     @Test
-    public void shouldReturnWrongDate(){
+    public void shouldReturnWrongDateFormat(){
         Flux<AvailableChangeTime> changeTimeFlux =
                 workshopController.getAvailableTimes(List.of("Test WS 3"), List.of("Car"), "2022-11-01", "2022-11-2");
 
@@ -148,6 +148,19 @@ public class WorkshopControllerTests {
                 .create(changeTimeFlux)
                 .expectErrorMatches(throwable -> throwable instanceof BadRequestException &&
                         throwable.getMessage().equals("Invalid date format"))
+                .verify();
+
+    }
+
+    @Test
+    public void shouldReturnUntilBeforeFrom(){
+        Flux<AvailableChangeTime> changeTimeFlux =
+                workshopController.getAvailableTimes(List.of("Test WS 3"), List.of("Car"), "2022-12-01", "2022-11-13");
+
+        StepVerifier
+                .create(changeTimeFlux)
+                .expectErrorMatches(throwable -> throwable instanceof BadRequestException &&
+                        throwable.getMessage().equals("From date is before Until date"))
                 .verify();
 
     }
