@@ -62,13 +62,16 @@ public class WorkshopController {
 
     }
 
-    private static ResponseEntity<Flux<AvailableChangeTime>> getResponseManyWorkshop(String from, String until, List<? extends WorkshopInterface> workshopsToGetTimesFor) {
-        Flux<AvailableChangeTime> responseBody = Flux.fromStream(workshopsToGetTimesFor.stream())
-                .flatMap(w -> w.getAvailableChangeTime(from, until));
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(responseBody);
+    private List<? extends WorkshopInterface> getWorkshops(List<String> workshops, List<String> vehicles) {
+        return workshopList.stream()
+                .filter(w -> workshops.contains(w.getWorkshop().name()))
+                .filter(w -> { for (String vehicle: vehicles){
+                                    if(w.getWorkshop().vehicles().contains(Workshop.VehicleType.valueOf(vehicle))) {
+                                        return true;
+                                    }
+                                }
+                                return false;
+                            }).toList();
     }
 
     private static ResponseEntity<Flux<AvailableChangeTime>> getResponseNoWorkshop(List<String> workshops, List<String> vehicles) {
@@ -80,18 +83,13 @@ public class WorkshopController {
                 .body(responseBody);
     }
 
-    private List<? extends WorkshopInterface> getWorkshops(List<String> workshops, List<String> vehicles) {
-        return workshopList.stream()
-                .filter(w -> workshops.contains(w.getWorkshop().name()))
-                .filter(w -> {
-                    for (String vehicle: vehicles){
-                        if(w.getWorkshop().vehicles().contains(Workshop.VehicleType.valueOf(vehicle))) {
-                            return true;
-                        }
-                    }
-                    return false;
-                })
-                .toList();
+    private static ResponseEntity<Flux<AvailableChangeTime>> getResponseManyWorkshop(String from, String until, List<? extends WorkshopInterface> workshopsToGetTimesFor) {
+        Flux<AvailableChangeTime> responseBody = Flux.fromStream(workshopsToGetTimesFor.stream())
+                .flatMap(w -> w.getAvailableChangeTime(from, until));
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseBody);
     }
 
     @Operation(summary = "Book available time")
