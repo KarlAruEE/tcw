@@ -164,4 +164,50 @@ public class WorkshopControllerTests {
                 .verify();
 
     }
+
+    @Test
+    public void shouldReturnAvailableTimes(){
+        List<AvailableChangeTime> changeTimeCorrect = List.of(
+                        new AvailableChangeTime(ZonedDateTime.parse("2022-12-01T10:00:00Z"),"ID-01"),
+                        new AvailableChangeTime(ZonedDateTime.parse("2022-12-01T11:10:10Z"),"ID-02"),
+                        new AvailableChangeTime(ZonedDateTime.parse("2022-12-01T10:00:00Z"),"IX-01"),
+                        new AvailableChangeTime(ZonedDateTime.parse("2022-12-01T11:10:10Z"),"IX-02"));
+
+        Flux<AvailableChangeTime> changeTimeFlux =
+                workshopController.getAvailableTimes(List.of("Test WS 1","Test WS 3"), List.of("Car"), "2022-12-01", "2022-12-02");
+
+        StepVerifier
+                .create(changeTimeFlux)
+                .expectNextMatches(w -> w.getTime().isEqual(changeTimeCorrect.get(0).getTime()) &&
+                                        w.getId().equals(changeTimeCorrect.get(0).getId()))
+                .expectNextMatches(w -> w.getTime().isEqual(changeTimeCorrect.get(1).getTime()) &&
+                                        w.getId().equals(changeTimeCorrect.get(1).getId()))
+                .expectNextMatches(w -> w.getTime().isEqual(changeTimeCorrect.get(2).getTime()) &&
+                                        w.getId().equals(changeTimeCorrect.get(2).getId()))
+                .expectNextMatches(w -> w.getTime().isEqual(changeTimeCorrect.get(3).getTime()) &&
+                                        w.getId().equals(changeTimeCorrect.get(3).getId()))
+                .verifyComplete();
+
+    }
+
+    @Test
+    public void shouldReturnFilteredByTruckAvailableTimes(){
+        List<AvailableChangeTime> changeTimeCorrect = List.of(
+                new AvailableChangeTime(ZonedDateTime.parse("2022-12-01T10:00:00Z"),"ID-01"),
+                new AvailableChangeTime(ZonedDateTime.parse("2022-12-01T11:10:10Z"),"ID-02"),
+                new AvailableChangeTime(ZonedDateTime.parse("2022-12-01T10:00:00Z"),"IX-01"),
+                new AvailableChangeTime(ZonedDateTime.parse("2022-12-01T11:10:10Z"),"IX-02"));
+
+        Flux<AvailableChangeTime> changeTimeFlux =
+                workshopController.getAvailableTimes(List.of("Test WS 1","Test WS 3"), List.of("Truck"), "2022-12-01", "2022-12-02");
+
+        StepVerifier
+                .create(changeTimeFlux)
+                .expectNextMatches(w -> w.getTime().isEqual(changeTimeCorrect.get(2).getTime()) &&
+                        w.getId().equals(changeTimeCorrect.get(2).getId()))
+                .expectNextMatches(w -> w.getTime().isEqual(changeTimeCorrect.get(3).getTime()) &&
+                        w.getId().equals(changeTimeCorrect.get(3).getId()))
+                .verifyComplete();
+
+    }
 }
