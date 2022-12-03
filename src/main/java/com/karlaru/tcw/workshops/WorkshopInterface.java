@@ -8,8 +8,8 @@ import reactor.core.publisher.Mono;
 
 public interface WorkshopInterface {
 
-    public Workshop getWorkshop();
-    public Flux<AvailableChangeTime> getAvailableChangeTime(String from, String until);
-    public Mono<Booking> bookChangeTime(Object id, Mono<ContactInformation> contactInformation);
-    public void setMockUrl(String mockUrl);
+    Workshop getWorkshop();
+    Flux<AvailableChangeTime> getAvailableChangeTime(String from, String until);
+    Mono<Booking> bookChangeTime(Object id, Mono<ContactInformation> contactInformation);
+    void setMockUrl(String mockUrl);
 }

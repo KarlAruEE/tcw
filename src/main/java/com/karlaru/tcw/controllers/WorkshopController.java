@@ -76,7 +76,7 @@ public class WorkshopController {
                 new BadRequestException(HttpStatus.BAD_REQUEST.value(), workshops + " workshop doesn't change " + vehicles));
 
         return ResponseEntity
-                .status(HttpStatus.OK)
+                .status(HttpStatus.BAD_REQUEST)
                 .body(responseBody);
     }
 
@@ -102,19 +102,28 @@ public class WorkshopController {
                                                            @PathVariable String id,
                                                            @RequestBody Mono<ContactInformation> contactInformation){
 
-        WorkshopInterface bookWorkshop = workshopList.stream()
+        WorkshopInterface bookWorkshop = getWorkshop(workshop);
+
+        if (bookWorkshop == null){
+            return getResponse(
+                    HttpStatus.NOT_FOUND,
+                    Mono.error(new NotFoundException(HttpStatus.NOT_FOUND.value(), workshop + " not found")));
+        }
+        return getResponse(
+                HttpStatus.OK,
+                bookWorkshop.bookChangeTime(id, contactInformation));
+
+    }
+
+    private WorkshopInterface getWorkshop(String workshop) {
+        return workshopList.stream()
                 .filter(w -> w.getWorkshop().name().equals(workshop))
                 .findAny()
                 .orElse(null);
-
-        if (bookWorkshop == null){
-            return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(Mono.error(new NotFoundException(HttpStatus.NOT_FOUND.value(), workshop + " not found" )));
-        }
+    }
+    private static ResponseEntity<Mono<Booking>> getResponse(HttpStatus httpStatus, Mono<Booking> bookingMono) {
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(bookWorkshop.bookChangeTime(id, contactInformation));
-
+                .status(httpStatus)
+                .body(bookingMono);
     }
 }
