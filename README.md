@@ -44,8 +44,15 @@ Controller
 - [X] Return correct available times filtering by vehicle types 
 
 Workshop London
+- [X] Should return available times
+- [X] Should book available time
 
 Workshop Manchester
+- [X] Should return available times
+- [X] Should book available time
 
-Integration
+Integration with London and Manchester API containers running
+- [X] Should return London times
+- [X] Should return Manchester times
+- [X] Should return both times
 
