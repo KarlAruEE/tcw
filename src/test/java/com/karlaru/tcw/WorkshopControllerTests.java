@@ -210,4 +210,27 @@ public class WorkshopControllerTests {
                 .verifyComplete();
 
     }
+
+    @Test
+    void shouldReturnWorkshopNotFound(){
+        Mono<Booking> query = workshopController.bookAvailableTime("Wrong Workshop", "5",Mono.just(new ContactInformation("contact info")));
+
+        StepVerifier
+                .create(query)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().contains("Wrong Workshop not found"))
+                .verify();
+    }
+
+    @Test
+    void shouldReturnBookingResponse(){
+        Mono<Booking> query = workshopController.bookAvailableTime("Test WS 1", "ID-01", Mono.just(new ContactInformation("contact info")));
+        Booking bookingResponse = new Booking("2022-12-01T10:00:00Z","ID-01");
+        StepVerifier
+                .create(query)
+                .expectNextMatches(booking -> booking.getId().equals(bookingResponse.getId()) &&
+                                              booking.getTime().equals(bookingResponse.getTime()))
+                .verifyComplete();
+    }
+
 }
