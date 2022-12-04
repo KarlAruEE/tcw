@@ -11,20 +11,20 @@ docker-compose up -d
 
 #### Simple JavaScript Front-end at [localhost:8080](http://localhost:8080)
 
----
+
 
 ### Adding new workshops
 
 - Add a new class defining workshop and implementing [`WorkshopInterface`](src/main/java/com/karlaru/tcw/workshops/WorkshopInterface.java)
 - Add api url and env parameters to [docker-compose](docker-compose.yaml) file
 
----
+
 
 ### API Docs
 
 ### [Swagger at localhost:8080](http://localhost:8080/swagger-ui.html)
 
----
+
 ### Stop
 ```
 docker-compose down
@@ -66,6 +66,7 @@ POST
 #### Workshop London
 GET
 - [X] Should return available times
+- [X] Should return empty list if no times are found
 - [X] Return 400 from remote API
 - [X] Return 500 from remote API
 - [X] Return 500 when API is unavailable and/or response body mapping fails
@@ -80,5 +81,5 @@ POST
 #### Integration with London and Manchester API containers running
 - [X] Should return London times
 - [X] Should return Manchester times
-- [X] Should return both times
-
+- [X] Should return times for two workshops with one vehicle type specified
+- [X] Should return times for two workshops with both vehicle types specified

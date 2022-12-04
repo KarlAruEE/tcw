@@ -84,6 +84,26 @@ public class LondonWorkshopTest {
     }
 
     @Test
+    public void shouldReturnEmptyAvailableTimes() {
+
+        String remoteApiResponse =
+                "<tireChangeTimesResponse>" +
+                "</tireChangeTimesResponse>";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/xml; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Flux<AvailableChangeTime> response = londonWorkshop.getAvailableChangeTime("2002-11-30", "2002-12-01");
+
+        StepVerifier
+                .create(response)
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
     public void shouldReturnBadRequest() {
 
         String remoteApiResponse =  "<errorResponse>"+

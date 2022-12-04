@@ -13,12 +13,11 @@ public class IntegrationTests {
     @Test
     public void shouldReturnManchesterAvailableTimes(){
         webTestClient
-                .get().uri("/api/v1/workshop/Manchester/tire-change-times?from=2012-01-01&until=2023-01-01&vehicles=Truck")
+                .get().uri("/api/v1/workshop/Manchester/tire-change-times?from=2002-01-01&until=2003-01-01&vehicles=Truck")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                    .jsonPath("$").isArray()
-                    .jsonPath("$").isNotEmpty();
+                    .jsonPath("$").isArray();
     }
     @Test
     public void shouldReturnLondonAvailableTimes(){
@@ -27,8 +26,7 @@ public class IntegrationTests {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                    .jsonPath("$").isArray()
-                    .jsonPath("$").isNotEmpty();
+                    .jsonPath("$").isArray();
     }
     @Test
     public void shouldReturnAllAvailableTimes(){
@@ -37,7 +35,15 @@ public class IntegrationTests {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                    .jsonPath("$").isArray()
-                    .jsonPath("$").isNotEmpty();
+                    .jsonPath("$").isArray();
+    }
+    @Test
+    public void shouldReturnAllAvailableTimesAllVehicles(){
+        webTestClient
+                .get().uri("/api/v1/workshop/London,Manchester/tire-change-times?from=2012-01-01&until=2023-01-01&vehicles=Car,Truck")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$").isArray();
     }
 }
