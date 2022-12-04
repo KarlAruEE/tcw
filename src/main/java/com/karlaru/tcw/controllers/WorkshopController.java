@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -106,32 +105,20 @@ public class WorkshopController {
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK",
             content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Booking.class))})})
     @PutMapping(value = "/{workshop}/tire-change-times/{id}/booking", consumes = "application/json")
-    public ResponseEntity<Mono<Booking>> bookAvailableTime(@PathVariable String workshop,
-                                                           @PathVariable String id,
-                                                           @RequestBody Mono<ContactInformation> contactInformation){
+    public Mono<Booking> bookAvailableTime(@PathVariable String workshop,
+                                           @PathVariable String id,
+                                           @RequestBody Mono<ContactInformation> contactInformation){
 
-        WorkshopInterface bookWorkshop = getWorkshop(workshop);
-
-        if (bookWorkshop == null){
-            return getResponse(
-                    HttpStatus.NOT_FOUND,
-                    Mono.error(new NotFoundException(HttpStatus.NOT_FOUND.value(), workshop + " not found")));
-        }
-        return getResponse(
-                HttpStatus.OK,
-                bookWorkshop.bookChangeTime(id, contactInformation));
-
-    }
-
-    private WorkshopInterface getWorkshop(String workshop) {
-        return workshopList.stream()
+        WorkshopInterface bookWorkshop = this.workshopList.stream()
                 .filter(w -> w.getWorkshop().name().equals(workshop))
                 .findAny()
                 .orElse(null);
-    }
-    private static ResponseEntity<Mono<Booking>> getResponse(HttpStatus httpStatus, Mono<Booking> bookingMono) {
-        return ResponseEntity
-                .status(httpStatus)
-                .body(bookingMono);
+
+        if (bookWorkshop == null){
+            return Mono.error(new NotFoundException(HttpStatus.NOT_FOUND.value(), workshop + " not found"));
+        }
+
+        return bookWorkshop.bookChangeTime(id, contactInformation);
+
     }
 }
