@@ -1,6 +1,6 @@
 ## Tire Change Workshop
 
-### Run with Docker Compse
+## Run with Docker Compse
 
 Backend API's by [Surmus/tire-change-workshop](https://github.com/Surmus/tire-change-workshop)
 
@@ -13,19 +13,19 @@ docker-compose up -d
 
 
 
-### Adding new workshops
+## Adding new workshops
 
 - Add a new class defining workshop and implementing [`WorkshopInterface`](src/main/java/com/karlaru/tcw/workshops/WorkshopInterface.java)
 - Add api url and env parameters to [docker-compose](docker-compose.yaml) file
 
 
 
-### API Docs
+## API Docs
 
-### [Swagger at localhost:8080](http://localhost:8080/swagger-ui.html)
+[Swagger at localhost:8080](http://localhost:8080/swagger-ui.html)
 
 
-### Stop
+## Stop
 ```
 docker-compose down
 ```
