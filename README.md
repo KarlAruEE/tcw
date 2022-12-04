@@ -31,9 +31,11 @@ docker-compose down
 ```
 
 ---
-### Tests
+## Tests
 
-Controller
+#### Controller
+
+GET
 - [X] Return list of workshops
 - [X] Return correct available times filtered by workshop names
 - [X] Return correct available times filtered by vehicle types
@@ -43,15 +45,25 @@ Controller
 - [X] Return 404 when no workshops found
 - [X] Return 404 when queried workshop is not found
 
-Workshop London
+PUT
+- [X] Return correct booking response confirmation
+- [X] Return 404 when invalid workshop
+
+#### Workshop London
 - [X] Should return available times
 - [X] Should book available time
 
-Workshop Manchester
+#### Workshop Manchester
+GET
 - [X] Should return available times
+- [X] Return 400 from remote API
+- [X] Return 500 from remote API
+- [X] Return 500 when API is unavailable or response body is incorrect
+
+POST
 - [X] Should book available time
 
-Integration with London and Manchester API containers running
+#### Integration with London and Manchester API containers running
 - [X] Should return London times
 - [X] Should return Manchester times
 - [X] Should return both times

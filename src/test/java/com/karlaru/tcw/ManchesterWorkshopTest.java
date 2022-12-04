@@ -1,5 +1,7 @@
 package com.karlaru.tcw;
 
+import com.karlaru.tcw.exceptions.BadRequestException;
+import com.karlaru.tcw.exceptions.ErrorException;
 import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
@@ -81,6 +83,87 @@ public class ManchesterWorkshopTest {
                                 e.getWorkshop() == testTime2.getWorkshop() &&
                                 e.getTime().isEqual(testTime2.getTime()))
                 .verifyComplete();
+    }
+
+    @Test
+    public void shouldReturnBadRequest() {
+
+        BadRequestException badRequestException = new BadRequestException(400, "bad request 1");
+
+
+        String remoteApiResponse =
+                "{" +
+                    "\"code\": \"400\"," +
+                    "\"message\":\"bad request 1\"" +
+                "}" ;
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader("Content-Type", "application/json; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Flux<AvailableChangeTime> response = manchesterWorkshop.getAvailableChangeTime("2022-11-23", "2022-11-25");
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof BadRequestException &&
+                        ((BadRequestException) throwable).getExceptionData().getMessage().equals(badRequestException.getMessage()))
+                .verify();
+    }
+
+    @Test
+    public void shouldReturnInternalServerError() {
+
+        ErrorException errorException = new ErrorException(500, "Server error 1");
+
+
+        String remoteApiResponse =
+                "{" +
+                    "\"code\": \"500\"," +
+                    "\"message\":\"Server error 1\"" +
+                "}" ;
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader("Content-Type", "application/json; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Flux<AvailableChangeTime> response = manchesterWorkshop.getAvailableChangeTime("2022-11-23", "2022-11-25");
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof ErrorException &&
+                     ((ErrorException) throwable).getExceptionData().getMessage().equals(errorException.getMessage()))
+                .verify();
+    }
+
+    @Test
+    public void shouldReturnServerOfflineError() {
+
+        ErrorException errorException = new ErrorException(500, "Manchester REST api seems to be offline");
+
+        // response is with bad format for bodyToFlux or server is offline
+        String remoteApiResponse =
+                "[" +
+                    "{" +
+                        "\"id67\":5," +
+                        "\"time-xx\":\"2022-11-23T12:00:00Z\"," +
+                        "\"ava\":true" +
+                    "}" +
+                "]";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader("Content-Type", "application/json; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Flux<AvailableChangeTime> response = manchesterWorkshop.getAvailableChangeTime("2022-11-23", "2022-11-25");
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof ErrorException &&
+                        ((ErrorException) throwable).getExceptionData().getMessage().equals(errorException.getMessage()))
+                .verify();
     }
 
     @Test
