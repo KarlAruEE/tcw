@@ -181,10 +181,17 @@
             return false;
         }
         const response = await bookAvailableTime(id, workshopName, contactInformation);
-        const responseString = "Workshop: " + response.workshop.name + "\n" +
-                               "Time: " + new Date(response['time']).toLocaleString('et-EE') + "\n" +
-                               "ID: " + response['id'];
-        alert("Booking Successful!\n\n"+responseString);
+        if (!response.hasOwnProperty("code")) {
+            const responseString = "Workshop: " + response.workshop.name + "\n" +
+                "Time: " + new Date(response['time']).toLocaleString('et-EE') + "\n" +
+                "ID: " + response['id'];
+            alert("Booking Successful!\n\n" + responseString);
+        }
+        else{
+            const responseString =  "Code: " + response.code +"\n" +
+                                    "Message: "+ response.message;
+            alert("Booking error!\n\n" + responseString);
+        }
         await renderAvailableTimes();
     }
     async function bookAvailableTime(id, workshopName, contactInformation) {
