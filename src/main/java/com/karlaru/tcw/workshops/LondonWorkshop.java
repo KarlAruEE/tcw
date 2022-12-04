@@ -60,6 +60,7 @@ public class LondonWorkshop implements WorkshopInterface {
                         clientResponse -> clientResponse.bodyToMono(ErrorException.class))
                 .bodyToMono(XMLChangeTimesResponse.class)
                 .map(XMLChangeTimesResponse::getAvailableTime)
+                .onErrorComplete()
                 .flatMapIterable(list -> list)
                 .map(s -> new AvailableChangeTime(ZonedDateTime.parse(s.getTime()), s.getUuid()))
                 .map(m -> {
