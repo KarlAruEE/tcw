@@ -49,11 +49,7 @@ PUT
 - [X] Return correct booking response confirmation
 - [X] Return 404 when invalid workshop
 
-#### Workshop London
-- [X] Should return available times
-- [X] Should book available time
-
-#### Workshop Manchester
+#### Workshop London & Workshop Manchester
 GET
 - [X] Should return available times
 - [X] Return 400 from remote API

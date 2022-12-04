@@ -1,5 +1,8 @@
 package com.karlaru.tcw;
 
+import com.karlaru.tcw.exceptions.BadRequestException;
+import com.karlaru.tcw.exceptions.ErrorException;
+import com.karlaru.tcw.exceptions.UnprocessableEntityException;
 import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
@@ -28,6 +31,7 @@ public class LondonWorkshopTest {
 
     private static final AvailableChangeTime testTime = new AvailableChangeTime(ZonedDateTime.parse("2022-11-30T08:00:00Z"),
                                                                                     "79c840f9-d8af-439a-a755-223d6582fa98");
+    private static final ContactInformation contactInformation = new ContactInformation("Back in London");
 
     @BeforeAll
     static void setUp() throws IOException {
@@ -73,13 +77,79 @@ public class LondonWorkshopTest {
     }
 
     @Test
+    public void shouldReturnBadRequest() {
+
+        String remoteApiResponse =  "<errorResponse>"+
+                                    "  <statusCode>400</statusCode>"+
+                                    "  <error>bad req 1</error>"+
+                                    "</errorResponse>";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader("Content-Type", "application/xml; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Flux<AvailableChangeTime> response = londonWorkshop.getAvailableChangeTime("2022-11-23", "2022-11-25");
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof BadRequestException &&
+                        ((BadRequestException) throwable).getExceptionData().getMessage().equals("bad req 1"))
+                .verify();
+    }
+
+    @Test
+    public void shouldReturnInSeEr() {
+
+        String remoteApiResponse =  "<errorResponse>"+
+                                    "  <statusCode>500</statusCode>"+
+                                    "  <error>Internal Serv Error</error>"+
+                                    "</errorResponse>";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader("Content-Type", "application/xml; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Flux<AvailableChangeTime> response = londonWorkshop.getAvailableChangeTime("2022-11-23", "2022-11-25");
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof ErrorException &&
+                        ((ErrorException) throwable).getExceptionData().getMessage().equals("Internal Serv Error"))
+                .verify();
+    }
+
+    @Test
+    public void shouldReturnApiOffline() {
+
+        String remoteApiResponse =  "<tireChangeXXXXTimesResponse>" +
+                                    "  <availableTimer>" +
+                                    "    <id>79c840f9-d8af-439a-a755-223d6582fa98</uuid>" +
+                                    "    <timed>2022-11-30T08:00:00Z</time>" +
+                                    "  </availableTimes>" +
+                                    "</tireChangeTimesResponses>";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader("Content-Type", "application/xml; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Flux<AvailableChangeTime> response = londonWorkshop.getAvailableChangeTime("2022-11-23", "2022-11-25");
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof ErrorException &&
+                        ((ErrorException) throwable).getExceptionData().getMessage().equals("London REST api seems to be offline"))
+                .verify();
+    }
+
+    @Test
     public void shouldBookAvailableTime(){
 
-        ContactInformation contactInformation = new ContactInformation("Back in London");
-
-        String remoteApiResponse =  "<tireChangeBookingResponse>\n" +
-                                    "  <uuid>79c840f9-d8af-439a-a755-223d6582fa98</uuid>\n" +
-                                    "  <time>2022-11-30T08:00:00Z</time>\n" +
+        String remoteApiResponse =  "<tireChangeBookingResponse>" +
+                                    "  <uuid>79c840f9-d8af-439a-a755-223d6582fa98</uuid>" +
+                                    "  <time>2022-11-30T08:00:00Z</time>" +
                                     "</tireChangeBookingResponse>";
 
         mockWebServer.enqueue(new MockResponse()
@@ -96,5 +166,96 @@ public class LondonWorkshopTest {
                                 e.getId().equals(testTime.getId()) &&
                                 ZonedDateTime.parse(e.getTime()).isEqual(testTime.getTime()))
                 .verifyComplete();
+    }
+
+    @Test
+    public void shouldBookBadRequest(){
+
+        String remoteApiResponse =  "<errorResponse>"+
+                                    "  <statusCode>400</statusCode>"+
+                                    "  <error>Bad Request</error>"+
+                                    "</errorResponse>";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader("Content-Type", "application/xml; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Mono<Booking> response = londonWorkshop.bookChangeTime("79c840f9-d8af-439a-a755-223d6582fa98",
+                Mono.just(contactInformation));
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof BadRequestException &&
+                        ((BadRequestException) throwable).getExceptionData().getMessage().equals("Bad Request"))
+                .verify();
+    }
+
+    @Test
+    public void shouldBookButBookedAlready(){
+
+        String remoteApiResponse =  "<errorResponse>"+
+                                    "  <statusCode>422</statusCode>"+
+                                    "  <error>tire change time  is unavailable</error>"+
+                                    "</errorResponse>";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(422)
+                .setHeader("Content-Type", "application/xml; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Mono<Booking> response = londonWorkshop.bookChangeTime("79c840f9-d8af-439a-a755-223d6582fa98",
+                Mono.just(contactInformation));
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof UnprocessableEntityException &&
+                        ((UnprocessableEntityException) throwable).getExceptionData().getMessage().equals("tire change time  is unavailable"))
+                .verify();
+    }
+
+    @Test
+    public void shouldBookButInSeEr(){
+
+        String remoteApiResponse =  "<errorResponse>"+
+                                    "  <statusCode>500</statusCode>"+
+                                    "  <error>In Se Er</error>"+
+                                    "</errorResponse>";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader("Content-Type", "application/xml; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Mono<Booking> response = londonWorkshop.bookChangeTime("79c840f9-d8af-439a-a755-223d6582fa98",
+                Mono.just(contactInformation));
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof ErrorException &&
+                        ((ErrorException) throwable).getExceptionData().getMessage().equals("In Se Er"))
+                .verify();
+    }
+    @Test
+    public void shouldBookButApiOffline(){
+
+        String remoteApiResponse =  "<tireChangeBookingResponses>" +
+                                    "  <uuids>79c840f9-d8af-439a-a755-223d6582fa98</uuid>" +
+                                    "  <timed>2022-11-30T08:00:00Z</time>" +
+                                    "</tireChangeBookingResponses>";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader("Content-Type", "application/xml; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Mono<Booking> response = londonWorkshop.bookChangeTime("79c840f9-d8af-439a-a755-223d6582fa98",
+                Mono.just(contactInformation));
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof ErrorException &&
+                        ((ErrorException) throwable).getExceptionData().getMessage().equals("London REST api seems to be offline"))
+                .verify();
     }
 }
