@@ -28,9 +28,6 @@ public class LondonWorkshopTest {
 
     private static MockWebServer mockWebServer;
     private static final LondonWorkshop londonWorkshop = new LondonWorkshop(WebClient.builder().build());
-
-    private static final AvailableChangeTime testTime = new AvailableChangeTime(ZonedDateTime.parse("2022-11-30T08:00:00Z"),
-                                                                                    "79c840f9-d8af-439a-a755-223d6582fa98");
     private static final ContactInformation contactInformation = new ContactInformation("Back in London");
 
     @BeforeAll
@@ -48,14 +45,19 @@ public class LondonWorkshopTest {
 
     @Test
     public void shouldReturnAvailableTimes() {
-
-        testTime.setWorkshop(londonWorkshop.getWorkshop());
-
+        AvailableChangeTime testTime1 = new AvailableChangeTime(ZonedDateTime.parse("2022-11-30T08:00:00Z"),"79c840f9-d8af-439a-a755-223d6582fa98");
+        testTime1.setWorkshop(londonWorkshop.getWorkshop());
+        AvailableChangeTime testTime2 = new AvailableChangeTime(ZonedDateTime.parse("2022-11-30T09:00:00Z"),"79c840f9-d8af-439a-a755-223d6582fa99");
+        testTime2.setWorkshop(londonWorkshop.getWorkshop());
 
         String remoteApiResponse =  "<tireChangeTimesResponse>" +
                                     "  <availableTime>" +
                                     "    <uuid>79c840f9-d8af-439a-a755-223d6582fa98</uuid>" +
                                     "    <time>2022-11-30T08:00:00Z</time>" +
+                                    "  </availableTime>" +
+                                    "  <availableTime>" +
+                                    "    <uuid>79c840f9-d8af-439a-a755-223d6582fa99</uuid>" +
+                                    "    <time>2022-11-30T09:00:00Z</time>" +
                                     "  </availableTime>" +
                                     "</tireChangeTimesResponse>";
 
@@ -69,10 +71,15 @@ public class LondonWorkshopTest {
         StepVerifier
                 .create(response)
                 .expectNextMatches(e ->
-                                e.getId().equals(testTime.getId()) &&
+                                e.getId().equals(testTime1.getId()) &&
                                 e.isAvailable() &&
-                                e.getWorkshop() == testTime.getWorkshop() &&
-                                e.getTime().isEqual(testTime.getTime()))
+                                e.getWorkshop() == testTime1.getWorkshop() &&
+                                e.getTime().isEqual(testTime1.getTime()))
+                .expectNextMatches(e ->
+                        e.getId().equals(testTime2.getId()) &&
+                                e.isAvailable() &&
+                                e.getWorkshop() == testTime2.getWorkshop() &&
+                                e.getTime().isEqual(testTime2.getTime()))
                 .verifyComplete();
     }
 
@@ -163,8 +170,8 @@ public class LondonWorkshopTest {
         StepVerifier
                 .create(response)
                 .expectNextMatches(e ->
-                                e.getId().equals(testTime.getId()) &&
-                                ZonedDateTime.parse(e.getTime()).isEqual(testTime.getTime()))
+                                e.getId().equals("79c840f9-d8af-439a-a755-223d6582fa98") &&
+                                e.getTime().equals("2022-11-30T08:00:00Z"))
                 .verifyComplete();
     }
 
