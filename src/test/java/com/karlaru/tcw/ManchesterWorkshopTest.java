@@ -2,6 +2,7 @@ package com.karlaru.tcw;
 
 import com.karlaru.tcw.exceptions.BadRequestException;
 import com.karlaru.tcw.exceptions.ErrorException;
+import com.karlaru.tcw.exceptions.UnprocessableEntityException;
 import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
@@ -193,4 +194,111 @@ public class ManchesterWorkshopTest {
                 .verifyComplete();
 
     }
+
+    @Test
+    public void shouldReturnBadPostRequest() {
+
+        BadRequestException badRequestException = new BadRequestException(11, "strconv.ParseUint: parsing -1: invalid syntax");
+        ContactInformation contactInformation = new ContactInformation("Back in Black");
+
+        String remoteApiResponse =
+                "{" +
+                        "\"code\": \"11\"," +
+                        "\"message\":\"strconv.ParseUint: parsing -1: invalid syntax\"" +
+                "}" ;
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader("Content-Type", "application/json; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Mono<Booking> response = manchesterWorkshop.bookChangeTime("-1", Mono.just(contactInformation));
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof BadRequestException &&
+                        ((BadRequestException) throwable).getExceptionData().getMessage().equals(badRequestException.getMessage()))
+                .verify();
+    }
+
+    @Test
+    public void shouldReturnUnprocessedPostRequest() {
+
+        UnprocessableEntityException unprocessableEntityException =
+                new UnprocessableEntityException(22, "tire change time 11 is unavailable");
+        ContactInformation contactInformation = new ContactInformation("Back in Black");
+
+        String remoteApiResponse =
+                "{" +
+                        "\"code\": \"22\"," +
+                        "\"message\":\"tire change time 11 is unavailable\"" +
+                        "}" ;
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(422)
+                .setHeader("Content-Type", "application/json; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Mono<Booking> response = manchesterWorkshop.bookChangeTime("11", Mono.just(contactInformation));
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof UnprocessableEntityException &&
+                        ((UnprocessableEntityException) throwable).getExceptionData().getMessage().equals(unprocessableEntityException.getMessage()))
+                .verify();
+    }
+
+    @Test
+    public void shouldReturnInSeErPostRequest() {
+
+        ErrorException errorException =
+                new ErrorException(500, "internal server error");
+        ContactInformation contactInformation = new ContactInformation("Back in Black");
+
+        String remoteApiResponse =
+                "{" +
+                        "\"code\": \"500\"," +
+                        "\"message\":\"internal server error\"" +
+                        "}" ;
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader("Content-Type", "application/json; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Mono<Booking> response = manchesterWorkshop.bookChangeTime("1", Mono.just(contactInformation));
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof ErrorException &&
+                        ((ErrorException) throwable).getExceptionData().getMessage().equals(errorException.getMessage()))
+                .verify();
+    }
+    @Test
+    public void shouldReturnApiDownPostRequest() {
+
+        ErrorException errorException =
+                new ErrorException(500, "Manchester REST api seems to be offline");
+        ContactInformation contactInformation = new ContactInformation("Back in Black");
+
+        String remoteApiResponse =
+                "{" +
+                        "\"code\": \"500\"," +
+                        "\"message\":\"Manchester REST api seems to be offline\"" +
+                        "}" ;
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader("Content-Type", "application/json; charset=utf-8")
+                .setBody(remoteApiResponse));
+
+        Mono<Booking> response = manchesterWorkshop.bookChangeTime("1", Mono.just(contactInformation));
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof ErrorException &&
+                        ((ErrorException) throwable).getExceptionData().getMessage().equals(errorException.getMessage()))
+                .verify();
+    }
+
 }

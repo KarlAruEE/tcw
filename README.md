@@ -58,10 +58,14 @@ GET
 - [X] Should return available times
 - [X] Return 400 from remote API
 - [X] Return 500 from remote API
-- [X] Return 500 when API is unavailable or response body is incorrect
+- [X] Return 500 when API is unavailable and/or response body mapping fails
 
 POST
 - [X] Should book available time
+- [X] Return 400 from remote API
+- [X] Return 422 from remote API
+- [X] Return 500 from remote API
+- [X] Return 500 when API is unavailable and/or response body mapping fails
 
 #### Integration with London and Manchester API containers running
 - [X] Should return London times
