@@ -1,4 +1,9 @@
-## Tire Change Workshop
+# Tire Change Workshop
+
+**Tech-stack**
+- Java 19
+- JavaScript
+- Spring WebFlux
 
 ## Run with Docker Compse
 
@@ -22,7 +27,7 @@ docker-compose up -d
 
 ## API Docs
 
-[Swagger at localhost:8080](http://localhost:8080/swagger-ui.html)
+**Swagger at [localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)**
 
 
 ## Stop
@@ -31,7 +36,7 @@ docker-compose down
 ```
 
 ---
-## Tests
+### Tests
 
 #### Controller
 
@@ -44,7 +49,7 @@ GET
 - [X] Return 404 when queried workshop is not found
 
 PUT
-- [X] Return correct booking response confirmation
+- [X] Return correct booking confirmation response
 - [X] Return 404 when invalid workshop
 
 #### Workshop Manchester
@@ -78,7 +83,8 @@ POST
 - [X] Return 500 from remote API
 - [X] Return 500 when API is unavailable and/or response body mapping fails
 
-#### Integration with London and Manchester API containers running
+#### Integration tests (London and Manchester containers must be running)
+GET
 - [X] Should return London times
 - [X] Should return Manchester times
 - [X] Should return times for two workshops with one vehicle type specified
