@@ -40,8 +40,6 @@ GET
 - [X] Return correct available times filtered by workshop names
 - [X] Return correct available times filtered by vehicle types
 - [X] Return 400 when queried workshop doesn't change queried vehicle type
-- [X] Return 400 when invalid date format
-- [X] Return 400 when from date is after until date
 - [X] Return 404 when no workshops found
 - [X] Return 404 when queried workshop is not found
 
@@ -49,7 +47,23 @@ PUT
 - [X] Return correct booking response confirmation
 - [X] Return 404 when invalid workshop
 
-#### Workshop London & Workshop Manchester
+#### Workshop Manchester
+GET
+- [X] Should return available times
+- [X] Return 400 when invalid date format
+- [X] Return 400 when from date is after until date
+- [X] Return 400 from remote API
+- [X] Return 500 from remote API
+- [X] Return 500 when API is unavailable and/or response body mapping fails
+
+POST
+- [X] Should book available time
+- [X] Return 400 from remote API
+- [X] Return 422 from remote API
+- [X] Return 500 from remote API
+- [X] Return 500 when API is unavailable and/or response body mapping fails
+
+#### Workshop London
 GET
 - [X] Should return available times
 - [X] Return 400 from remote API

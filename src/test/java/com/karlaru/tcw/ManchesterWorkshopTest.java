@@ -110,6 +110,30 @@ public class ManchesterWorkshopTest {
     }
 
     @Test
+    public void shouldReturnBadDateError() {
+
+        Flux<AvailableChangeTime> response = manchesterWorkshop.getAvailableChangeTime("2022-11-01", "2022-11-2");
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof BadRequestException &&
+                        ((BadRequestException) throwable).getExceptionData().getMessage().equals("Invalid date format"))
+                .verify();
+    }
+
+    @Test
+    public void shouldReturnUntilBeforeFromError() {
+
+        Flux<AvailableChangeTime> response = manchesterWorkshop.getAvailableChangeTime("2022-11-15", "2022-11-02");
+
+        StepVerifier
+                .create(response)
+                .expectErrorMatches(throwable -> throwable instanceof BadRequestException &&
+                        ((BadRequestException) throwable).getExceptionData().getMessage().equals("From date is after Until date"))
+                .verify();
+    }
+
+    @Test
     public void shouldReturnInternalServerError() {
 
         String remoteApiResponse =

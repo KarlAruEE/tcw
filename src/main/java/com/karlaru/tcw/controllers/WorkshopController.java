@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -82,18 +81,6 @@ public class WorkshopController {
         if (suitableWorkshops.size() == 0)
             return Flux.error(
                     new BadRequestException(HttpStatus.BAD_REQUEST.value(), workshops + " workshop doesn't change " + vehicles));
-
-        // Validate date-time
-        try {
-            ZonedDateTime fromZDT = ZonedDateTime.parse(from + "T00:00:00Z");
-            ZonedDateTime untilZDT = ZonedDateTime.parse(until + "T00:00:00Z");
-            if (untilZDT.isBefore(fromZDT)) {
-                return Flux.error(
-                        new BadRequestException(HttpStatus.BAD_REQUEST.value(), "From date is after Until date"));
-            }
-        }catch (Exception e){
-            return Flux.error(new BadRequestException(HttpStatus.BAD_REQUEST.value(), "Invalid date format"));
-        }
 
         // Return aggregated data for 1 or more workshops
         return Flux.fromStream(suitableWorkshops.stream())

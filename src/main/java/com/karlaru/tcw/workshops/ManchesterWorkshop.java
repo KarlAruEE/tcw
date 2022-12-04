@@ -18,6 +18,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -49,26 +50,35 @@ public class ManchesterWorkshop implements WorkshopInterface {
     public Flux<AvailableChangeTime> getAvailableChangeTime(String from, String until) {
         String getUrl = String.format("%s?from=%s", manchesterUrl, from);
 
-        ZonedDateTime untilZonedDateTime = ZonedDateTime.parse(until + "T00:00:00Z");
+        try {
+            ZonedDateTime fromZDT = ZonedDateTime.parse(from + "T00:00:00Z");
+            ZonedDateTime untilZDT = ZonedDateTime.parse(until + "T00:00:00Z");
+            if (untilZDT.isBefore(fromZDT)) {
+                return Flux.error(
+                        new BadRequestException(HttpStatus.BAD_REQUEST.value(), "From date is after Until date"));
+            }
 
-        return webClient
-                .get()
-                .uri(getUrl)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .retrieve()
-                .onStatus(HttpStatus::is4xxClientError,
-                        clientResponse -> clientResponse.bodyToMono(BadRequestException.class))
-                .onStatus(HttpStatus::is5xxServerError,
-                        clientResponse -> clientResponse.bodyToMono(ErrorException.class))
-                .bodyToFlux(AvailableChangeTime.class)
-                .map(m -> {
-                    m.setWorkshop(workshop);
-                    return m;
-                })
-                .filter(f -> f.getTime().isBefore(untilZonedDateTime))
-                .onErrorMap(Predicate.not(BadRequestException.class::isInstance)
-                       .and(Predicate.not(ErrorException.class::isInstance)),
-                        throwable -> new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR.value(), workshop.name()+" REST api seems to be offline"));
+            return webClient
+                    .get()
+                    .uri(getUrl)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .retrieve()
+                    .onStatus(HttpStatus::is4xxClientError,
+                            clientResponse -> clientResponse.bodyToMono(BadRequestException.class))
+                    .onStatus(HttpStatus::is5xxServerError,
+                            clientResponse -> clientResponse.bodyToMono(ErrorException.class))
+                    .bodyToFlux(AvailableChangeTime.class)
+                    .map(m -> {
+                        m.setWorkshop(workshop);
+                        return m;
+                    })
+                    .filter(f -> f.getTime().isBefore(untilZDT))
+                    .onErrorMap(Predicate.not(BadRequestException.class::isInstance)
+                           .and(Predicate.not(ErrorException.class::isInstance)),
+                            throwable -> new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR.value(), workshop.name()+" REST api seems to be offline"));
+        }catch (DateTimeParseException e){
+            return Flux.error(new BadRequestException(HttpStatus.BAD_REQUEST.value(), "Invalid date format"));
+        }
     }
 
     @Override
