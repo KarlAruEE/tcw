@@ -56,16 +56,18 @@ public class LondonWorkshop implements WorkshopInterface {
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
                         clientResponse -> clientResponse.bodyToMono(BadRequestException.class))
+                .onStatus(HttpStatus::is5xxServerError,
+                        clientResponse -> clientResponse.bodyToMono(ErrorException.class))
                 .bodyToMono(XMLChangeTimesResponse.class)
                 .map(XMLChangeTimesResponse::getAvailableTime)
-                .onErrorComplete()
                 .flatMapIterable(list -> list)
                 .map(s -> new AvailableChangeTime(ZonedDateTime.parse(s.getTime()), s.getUuid()))
                 .map(m -> {
                     m.setWorkshop(workshop);
                     return m;
                 })
-                .onErrorMap(Predicate.not(BadRequestException.class::isInstance),
+                .onErrorMap(Predicate.not(BadRequestException.class::isInstance)
+                       .and(Predicate.not(ErrorException.class::isInstance)),
                         throwable -> new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR.value(), workshop.name()+" REST api seems to be offline"));
     }
 
@@ -78,21 +80,25 @@ public class LondonWorkshop implements WorkshopInterface {
                 .accept(MediaType.TEXT_XML)
                 .body(contactInformation, ContactInformation.class)
                 .retrieve()
-                .onStatus(HttpStatus::isError,
+                .onStatus(HttpStatus::is4xxClientError,
                         clientResponse -> {
-                            if(clientResponse.statusCode().value()==HttpStatus.UNPROCESSABLE_ENTITY.value()) {
-                                return clientResponse.bodyToMono(UnprocessableEntityException.class);
-                            }
-                            else {
+                            if(clientResponse.statusCode().value()==HttpStatus.BAD_REQUEST.value()) {
                                 return clientResponse.bodyToMono(BadRequestException.class);
                             }
+                            else {
+                                return clientResponse.bodyToMono(UnprocessableEntityException.class);
+                            }
                         })
+                .onStatus(HttpStatus::is5xxServerError,
+                        clientResponse -> clientResponse.bodyToMono(ErrorException.class))
                 .bodyToMono(Booking.class)
                 .map(booking -> {
                     booking.setWorkshop(workshop);
                     return booking;
                 })
-                .onErrorMap(Predicate.not(BadRequestException.class::isInstance).and(Predicate.not(UnprocessableEntityException.class::isInstance)),
+                .onErrorMap(Predicate.not(BadRequestException.class::isInstance)
+                                .and(Predicate.not(UnprocessableEntityException.class::isInstance)
+                                        .and(Predicate.not(ErrorException.class::isInstance))),
                         throwable -> new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR.value(), workshop.name()+" REST api seems to be offline"));
     }
 }
