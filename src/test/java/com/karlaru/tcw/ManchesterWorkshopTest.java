@@ -28,7 +28,7 @@ public class ManchesterWorkshopTest {
 
     private static MockWebServer mockWebServer;
     private static final ManchesterWorkshop manchesterWorkshop = new ManchesterWorkshop(WebClient.builder().build());
-
+    private static final ContactInformation contactInformation = new ContactInformation("Back in Black");
     @BeforeAll
     static void setUp() throws IOException {
         mockWebServer = new MockWebServer();
@@ -89,9 +89,6 @@ public class ManchesterWorkshopTest {
     @Test
     public void shouldReturnBadRequest() {
 
-        BadRequestException badRequestException = new BadRequestException(400, "bad request 1");
-
-
         String remoteApiResponse =
                 "{" +
                     "\"code\": \"400\"," +
@@ -108,15 +105,12 @@ public class ManchesterWorkshopTest {
         StepVerifier
                 .create(response)
                 .expectErrorMatches(throwable -> throwable instanceof BadRequestException &&
-                        ((BadRequestException) throwable).getExceptionData().getMessage().equals(badRequestException.getMessage()))
+                        ((BadRequestException) throwable).getExceptionData().getMessage().equals("bad request 1"))
                 .verify();
     }
 
     @Test
     public void shouldReturnInternalServerError() {
-
-        ErrorException errorException = new ErrorException(500, "Server error 1");
-
 
         String remoteApiResponse =
                 "{" +
@@ -134,14 +128,12 @@ public class ManchesterWorkshopTest {
         StepVerifier
                 .create(response)
                 .expectErrorMatches(throwable -> throwable instanceof ErrorException &&
-                     ((ErrorException) throwable).getExceptionData().getMessage().equals(errorException.getMessage()))
+                     ((ErrorException) throwable).getExceptionData().getMessage().equals("Server error 1"))
                 .verify();
     }
 
     @Test
     public void shouldReturnServerOfflineError() {
-
-        ErrorException errorException = new ErrorException(500, "Manchester REST api seems to be offline");
 
         // response is with bad format for bodyToFlux or server is offline
         String remoteApiResponse =
@@ -163,14 +155,13 @@ public class ManchesterWorkshopTest {
         StepVerifier
                 .create(response)
                 .expectErrorMatches(throwable -> throwable instanceof ErrorException &&
-                        ((ErrorException) throwable).getExceptionData().getMessage().equals(errorException.getMessage()))
+                        ((ErrorException) throwable).getExceptionData().getMessage().equals("Manchester REST api seems to be offline"))
                 .verify();
     }
 
     @Test
     public void shouldBookAvailableTime(){
         AvailableChangeTime testTime = new AvailableChangeTime(true, 5, ZonedDateTime.parse("2022-11-23T12:00:00Z"));
-        ContactInformation contactInformation = new ContactInformation("Back in Black");
 
         String remoteApiResponse = "{" +
                                         "\"id\":5," +
@@ -198,9 +189,6 @@ public class ManchesterWorkshopTest {
     @Test
     public void shouldReturnBadPostRequest() {
 
-        BadRequestException badRequestException = new BadRequestException(11, "strconv.ParseUint: parsing -1: invalid syntax");
-        ContactInformation contactInformation = new ContactInformation("Back in Black");
-
         String remoteApiResponse =
                 "{" +
                         "\"code\": \"11\"," +
@@ -217,16 +205,12 @@ public class ManchesterWorkshopTest {
         StepVerifier
                 .create(response)
                 .expectErrorMatches(throwable -> throwable instanceof BadRequestException &&
-                        ((BadRequestException) throwable).getExceptionData().getMessage().equals(badRequestException.getMessage()))
+                        ((BadRequestException) throwable).getExceptionData().getMessage().equals("strconv.ParseUint: parsing -1: invalid syntax"))
                 .verify();
     }
 
     @Test
     public void shouldReturnUnprocessedPostRequest() {
-
-        UnprocessableEntityException unprocessableEntityException =
-                new UnprocessableEntityException(22, "tire change time 11 is unavailable");
-        ContactInformation contactInformation = new ContactInformation("Back in Black");
 
         String remoteApiResponse =
                 "{" +
@@ -244,16 +228,12 @@ public class ManchesterWorkshopTest {
         StepVerifier
                 .create(response)
                 .expectErrorMatches(throwable -> throwable instanceof UnprocessableEntityException &&
-                        ((UnprocessableEntityException) throwable).getExceptionData().getMessage().equals(unprocessableEntityException.getMessage()))
+                        ((UnprocessableEntityException) throwable).getExceptionData().getMessage().equals("tire change time 11 is unavailable"))
                 .verify();
     }
 
     @Test
     public void shouldReturnInSeErPostRequest() {
-
-        ErrorException errorException =
-                new ErrorException(500, "internal server error");
-        ContactInformation contactInformation = new ContactInformation("Back in Black");
 
         String remoteApiResponse =
                 "{" +
@@ -271,15 +251,11 @@ public class ManchesterWorkshopTest {
         StepVerifier
                 .create(response)
                 .expectErrorMatches(throwable -> throwable instanceof ErrorException &&
-                        ((ErrorException) throwable).getExceptionData().getMessage().equals(errorException.getMessage()))
+                        ((ErrorException) throwable).getExceptionData().getMessage().equals("internal server error"))
                 .verify();
     }
     @Test
     public void shouldReturnApiDownPostRequest() {
-
-        ErrorException errorException =
-                new ErrorException(500, "Manchester REST api seems to be offline");
-        ContactInformation contactInformation = new ContactInformation("Back in Black");
 
         String remoteApiResponse =
                 "{" +
@@ -297,7 +273,7 @@ public class ManchesterWorkshopTest {
         StepVerifier
                 .create(response)
                 .expectErrorMatches(throwable -> throwable instanceof ErrorException &&
-                        ((ErrorException) throwable).getExceptionData().getMessage().equals(errorException.getMessage()))
+                        ((ErrorException) throwable).getExceptionData().getMessage().equals("Manchester REST api seems to be offline"))
                 .verify();
     }
 
