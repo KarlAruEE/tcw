@@ -232,7 +232,7 @@ public class ManchesterWorkshopTest {
                 "{" +
                         "\"code\": \"22\"," +
                         "\"message\":\"tire change time 11 is unavailable\"" +
-                        "}" ;
+                "}" ;
 
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(422)
@@ -259,7 +259,7 @@ public class ManchesterWorkshopTest {
                 "{" +
                         "\"code\": \"500\"," +
                         "\"message\":\"internal server error\"" +
-                        "}" ;
+                 "}" ;
 
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(500)
@@ -285,7 +285,7 @@ public class ManchesterWorkshopTest {
                 "{" +
                         "\"code\": \"500\"," +
                         "\"message\":\"Manchester REST api seems to be offline\"" +
-                        "}" ;
+                "}" ;
 
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(500)
