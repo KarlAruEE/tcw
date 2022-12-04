@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 @Service
@@ -59,8 +60,8 @@ public class LondonWorkshop implements WorkshopInterface {
                 .onStatus(HttpStatus::is5xxServerError,
                         clientResponse -> clientResponse.bodyToMono(ErrorException.class))
                 .bodyToMono(XMLChangeTimesResponse.class)
+                .filter(xmlChangeTimesResponse -> Objects.nonNull(xmlChangeTimesResponse.getAvailableTime()))
                 .map(XMLChangeTimesResponse::getAvailableTime)
-                .onErrorComplete()
                 .flatMapIterable(list -> list)
                 .map(s -> new AvailableChangeTime(ZonedDateTime.parse(s.getTime()), s.getUuid()))
                 .map(m -> {
