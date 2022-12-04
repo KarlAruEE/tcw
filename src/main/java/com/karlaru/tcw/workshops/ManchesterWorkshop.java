@@ -51,9 +51,6 @@ public class ManchesterWorkshop implements WorkshopInterface {
 
         ZonedDateTime untilZonedDateTime = ZonedDateTime.parse(until + "T00:00:00Z");
 
-        if (untilZonedDateTime.isBefore(ZonedDateTime.parse(from+"T00:00:00Z")))
-            return Flux.error(new BadRequestException(HttpStatus.BAD_REQUEST.value(), "Until date is before from"));
-
         return webClient
                 .get()
                 .uri(getUrl)
@@ -61,13 +58,15 @@ public class ManchesterWorkshop implements WorkshopInterface {
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
                         clientResponse -> clientResponse.bodyToMono(BadRequestException.class))
+                .onStatus(HttpStatus::is5xxServerError,
+                        clientResponse -> clientResponse.bodyToMono(ErrorException.class))
                 .bodyToFlux(AvailableChangeTime.class)
                 .map(m -> {
                     m.setWorkshop(workshop);
                     return m;
                 })
                 .filter(f -> f.getTime().isBefore(untilZonedDateTime))
-                .onErrorMap(Predicate.not(BadRequestException.class::isInstance),
+                .onErrorMap(Predicate.not(BadRequestException.class::isInstance).and(Predicate.not(ErrorException.class::isInstance)),
                         throwable -> new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR.value(), workshop.name()+" REST api seems to be offline"));
     }
 
