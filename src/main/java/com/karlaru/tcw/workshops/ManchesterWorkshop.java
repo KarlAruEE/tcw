@@ -17,6 +17,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -47,8 +49,8 @@ public class ManchesterWorkshop implements WorkshopInterface {
     }
 
     @Override
-    public Flux<AvailableChangeTime> getAvailableChangeTime(String from, String until) {
-        String getUrl = String.format("%s?from=%s", manchesterUrl, from);
+    public Flux<AvailableChangeTime> getAvailableChangeTime(final String from, final String until) {
+
 
         try {
             ZonedDateTime fromZDT = ZonedDateTime.parse(from + "T00:00:00Z");
@@ -57,6 +59,18 @@ public class ManchesterWorkshop implements WorkshopInterface {
                 return Flux.error(
                         new BadRequestException(HttpStatus.BAD_REQUEST.value(), "From date is after Until date"));
             }
+
+            Predicate<LocalDate> isWeekend = localDate -> localDate.getDayOfWeek() == DayOfWeek.SATURDAY ||
+                                                          localDate.getDayOfWeek() == DayOfWeek.SUNDAY;
+
+            List<LocalDate> businessDays = fromZDT.toLocalDate()
+                    .datesUntil(untilZDT.toLocalDate())
+                    .filter(isWeekend.negate())
+                    .toList();
+            int timesPerDay = 9;
+            int amount = businessDays.size() * timesPerDay;
+
+            String getUrl = String.format("%s?from=%s&amount=%s", manchesterUrl, from, amount);
 
             return webClient
                     .get()

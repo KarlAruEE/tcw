@@ -11,10 +11,10 @@ services:
       - london
       - manchester
   london:
-    image: 'surmus/london-tire-workshop:2.0.0'
+    image: 'surmus/london-tire-workshop:2.0.1'
     ports:
       - "9003:80"
   manchester:
-    image: 'surmus/manchester-tire-workshop:2.0.0'
+    image: 'surmus/manchester-tire-workshop:2.0.1'
     ports:
       - "9004:80"
