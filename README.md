@@ -39,6 +39,10 @@ Remote apis:
 ```
 docker-compose down
 ```
+Remove created containers
+```
+docker-compose rm -f
+```
 
 ---
 ### Tests
