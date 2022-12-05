@@ -29,6 +29,11 @@ docker-compose up -d
 
 **Swagger at [localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)**
 
+Remote apis:
+
+[London API](http://localhost:9003/swagger/index.html)
+
+[Manchester API](http://localhost:9004/swagger/index.html)
 
 ## Stop
 ```
@@ -76,7 +81,7 @@ GET
 - [X] Return 500 from remote API
 - [X] Return 500 when API is unavailable and/or response body mapping fails
 
-POST
+PUT
 - [X] Should book available time
 - [X] Return 400 from remote API
 - [X] Return 422 from remote API
