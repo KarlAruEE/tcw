@@ -3,16 +3,13 @@ package com.karlaru.tcw;
 import com.karlaru.tcw.workshops.LondonWorkshop;
 import com.karlaru.tcw.workshops.ManchesterWorkshop;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.event.annotation.BeforeTestExecution;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
@@ -26,7 +23,6 @@ public class IntegrationTests {
     @Autowired
     private ManchesterWorkshop manchesterWorkshop;
 
-    @Container
     private final GenericContainer<?> manchesterApi =
             new GenericContainer<>(DockerImageName.parse("surmus/manchester-tire-workshop:2.0.1"))
                     .withExposedPorts(80);
@@ -34,18 +30,19 @@ public class IntegrationTests {
     @Autowired
     private LondonWorkshop londonWorkshop;
 
-    @Container
     private final GenericContainer<?> londonApi =
             new GenericContainer<>(DockerImageName.parse("surmus/london-tire-workshop:2.0.1"))
                     .withExposedPorts(80);
 
-    @BeforeEach
+    @BeforeAll
     public void setUp(){
 
+        manchesterApi.start();
         String manchesterUrl = String.format("http://%s:%s/api/v2/tire-change-times", manchesterApi.getHost(), manchesterApi.getFirstMappedPort());
         ReflectionTestUtils.setField(manchesterWorkshop, "manchesterUrl", manchesterUrl);
 
-        String londonUrl = String.format("http://%s:%s/api/v1/tire-change-times", londonApi.getHost(),londonApi.getFirstMappedPort());
+        londonApi.start();
+        String londonUrl = String.format("http://%s:%s/api/v1/tire-change-times", londonApi.getHost(), londonApi.getFirstMappedPort());
         ReflectionTestUtils.setField(londonWorkshop, "londonUrl", londonUrl);
     }
 
