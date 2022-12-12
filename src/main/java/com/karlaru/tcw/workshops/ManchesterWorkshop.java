@@ -39,11 +39,6 @@ public class ManchesterWorkshop implements WorkshopInterface {
     }
 
     @Override
-    public void setMockUrl(String mockUrl){
-        this.manchesterUrl = mockUrl;
-    }
-
-    @Override
     public Workshop getWorkshop(){
         return this.workshop;
     }

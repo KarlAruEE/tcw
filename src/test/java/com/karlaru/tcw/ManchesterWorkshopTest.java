@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -34,7 +35,7 @@ public class ManchesterWorkshopTest {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
         String baseUrl = String.format("http://localhost:%s/api/v2/tire-change-times", mockWebServer.getPort());
-        manchesterWorkshop.setMockUrl(baseUrl);
+        ReflectionTestUtils.setField(manchesterWorkshop, "manchesterUrl", baseUrl);
     }
 
     @AfterAll

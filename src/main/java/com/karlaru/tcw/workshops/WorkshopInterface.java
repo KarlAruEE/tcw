@@ -11,5 +11,4 @@ public interface WorkshopInterface {
     Workshop getWorkshop();
     Flux<AvailableChangeTime> getAvailableChangeTime(String from, String until);
     Mono<Booking> bookChangeTime(String id, Mono<ContactInformation> contactInformation);
-    default void setMockUrl(String mockUrl){}
 }
