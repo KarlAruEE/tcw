@@ -36,7 +36,7 @@ public class LondonWorkshopTest {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
         String baseUrl = String.format("http://localhost:%s/api/v1/tire-change-times", mockWebServer.getPort());
-        ReflectionTestUtils.setField(londonWorkshop, "londonUrl", baseUrl);
+        ReflectionTestUtils.setField(londonWorkshop, "url", baseUrl);
     }
 
     @AfterAll

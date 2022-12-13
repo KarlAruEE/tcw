@@ -7,7 +7,8 @@ import com.karlaru.tcw.exceptions.UnprocessableEntityException;
 import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,10 +26,11 @@ import java.util.List;
 import java.util.function.Predicate;
 
 @Service
+@ConfigurationProperties(prefix = "manchester")
 public class ManchesterWorkshop implements WorkshopInterface {
 
-    @Value("${MANCHESTER_URL:http://localhost:9004/api/v2/tire-change-times}")
-    private String manchesterUrl;
+    @Setter
+    private String url;
     private final WebClient webClient;
 
     private final Workshop workshop =
@@ -65,7 +67,7 @@ public class ManchesterWorkshop implements WorkshopInterface {
             int timesPerDay = 9;
             int amount = businessDays.size() * timesPerDay;
 
-            String getUrl = String.format("%s?from=%s&amount=%s", manchesterUrl, from, amount);
+            String getUrl = String.format("%s?from=%s&amount=%s", url, from, amount);
 
             return webClient
                     .get()
@@ -94,7 +96,7 @@ public class ManchesterWorkshop implements WorkshopInterface {
     public Mono<Booking> bookChangeTime(String id, Mono<ContactInformation> contactInformation) {
         return webClient
                 .post()
-                .uri(manchesterUrl+"/{id}/booking", id)
+                .uri(url+"/{id}/booking", id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(contactInformation, ContactInformation.class)

@@ -8,7 +8,8 @@ import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
 import com.karlaru.tcw.response.models.XMLChangeTimesResponse;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,10 +24,11 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 @Service
+@ConfigurationProperties(prefix = "london")
 public class LondonWorkshop implements WorkshopInterface {
 
-    @Value("${LONDON_URL:http://localhost:9003/api/v1/tire-change-times}")
-    private String londonUrl;
+    @Setter
+    private String url;
     private final WebClient webClient;
 
     private final Workshop workshop =
@@ -43,7 +45,7 @@ public class LondonWorkshop implements WorkshopInterface {
 
     @Override
     public Flux<AvailableChangeTime> getAvailableChangeTime(String from, String until) {
-        String getUrl = String.format("%s/available?from=%s&until=%s", londonUrl, from, until);
+        String getUrl = String.format("%s/available?from=%s&until=%s", url, from, until);
 
         return webClient
                 .get()
@@ -72,7 +74,7 @@ public class LondonWorkshop implements WorkshopInterface {
     public Mono<Booking> bookChangeTime(String id, Mono<ContactInformation> contactInformation) {
         return webClient
                 .put()
-                .uri(londonUrl+"/{id}/booking", id)
+                .uri(url +"/{id}/booking", id)
                 .contentType(MediaType.TEXT_XML)
                 .accept(MediaType.TEXT_XML)
                 .body(contactInformation, ContactInformation.class)

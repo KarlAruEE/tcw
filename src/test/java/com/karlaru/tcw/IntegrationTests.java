@@ -39,11 +39,11 @@ public class IntegrationTests {
 
         manchesterApi.start();
         String manchesterUrl = String.format("http://%s:%s/api/v2/tire-change-times", manchesterApi.getHost(), manchesterApi.getFirstMappedPort());
-        ReflectionTestUtils.setField(manchesterWorkshop, "manchesterUrl", manchesterUrl);
+        ReflectionTestUtils.setField(manchesterWorkshop, "url", manchesterUrl);
 
         londonApi.start();
         String londonUrl = String.format("http://%s:%s/api/v1/tire-change-times", londonApi.getHost(), londonApi.getFirstMappedPort());
-        ReflectionTestUtils.setField(londonWorkshop, "londonUrl", londonUrl);
+        ReflectionTestUtils.setField(londonWorkshop, "url", londonUrl);
     }
 
     @Test
