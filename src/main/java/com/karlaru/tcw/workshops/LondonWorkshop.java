@@ -19,7 +19,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -27,12 +26,12 @@ import java.util.function.Predicate;
 @ConfigurationProperties(prefix = "london")
 public class LondonWorkshop implements WorkshopInterface {
 
-    @Setter
-    private String url;
     private final WebClient webClient;
 
-    private final Workshop workshop =
-            new Workshop("London", "1A Gunton Rd, London", List.of(Workshop.VehicleType.Car));
+    @Setter
+    private String url;
+    @Setter
+    private Workshop workshop;
 
     public LondonWorkshop(@Lazy WebClient webClient) {
         this.webClient = webClient;

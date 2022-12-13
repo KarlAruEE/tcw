@@ -29,12 +29,12 @@ import java.util.function.Predicate;
 @ConfigurationProperties(prefix = "manchester")
 public class ManchesterWorkshop implements WorkshopInterface {
 
-    @Setter
-    private String url;
     private final WebClient webClient;
 
-    private final Workshop workshop =
-            new Workshop("Manchester", "14 Bury New Rd, Manchester", List.of(Workshop.VehicleType.Car, Workshop.VehicleType.Truck));
+    @Setter
+    private String url;
+    @Setter
+    private Workshop workshop;
 
     public ManchesterWorkshop(@Lazy WebClient webClient) {
         this.webClient = webClient;

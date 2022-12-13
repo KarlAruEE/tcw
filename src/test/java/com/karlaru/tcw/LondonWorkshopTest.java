@@ -7,6 +7,7 @@ import com.karlaru.tcw.response.models.AvailableChangeTime;
 import com.karlaru.tcw.response.models.Booking;
 import com.karlaru.tcw.response.models.ContactInformation;
 import com.karlaru.tcw.workshops.LondonWorkshop;
+import com.karlaru.tcw.workshops.Workshop;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -37,6 +38,7 @@ public class LondonWorkshopTest {
         mockWebServer.start();
         String baseUrl = String.format("http://localhost:%s/api/v1/tire-change-times", mockWebServer.getPort());
         ReflectionTestUtils.setField(londonWorkshop, "url", baseUrl);
+        londonWorkshop.setWorkshop(new Workshop("London", null, null));
     }
 
     @AfterAll
