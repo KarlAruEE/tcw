@@ -95,8 +95,8 @@ public class LondonWorkshop implements WorkshopInterface {
                     return booking;
                 })
                 .onErrorMap(Predicate.not(BadRequestException.class::isInstance)
-                                .and(Predicate.not(UnprocessableEntityException.class::isInstance)
-                                        .and(Predicate.not(ErrorException.class::isInstance))),
+                       .and(Predicate.not(UnprocessableEntityException.class::isInstance)
+                       .and(Predicate.not(ErrorException.class::isInstance))),
                         throwable -> new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR.value(), workshop.name()+" REST api seems to be offline"));
     }
 }
